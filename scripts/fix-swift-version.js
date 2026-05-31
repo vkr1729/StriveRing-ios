@@ -165,6 +165,121 @@ if (fs.existsSync(nodeModulesPath)) {
         }
       }
 
+      // Fix visionOS-only APIs in expo-router
+      if (path.basename(filePath) === 'RouterToolbarHostView.swift') {
+        const replacement = `#if os(visionOS)
+            if let hidesSharedBackground = menu.hidesSharedBackground {
+              item.hidesSharedBackground = hidesSharedBackground
+            }
+            if let sharesBackground = menu.sharesBackground {
+              item.sharesBackground = sharesBackground
+            }
+            #endif`;
+        if (content.includes('hidesSharedBackground')) {
+          console.log(`Fixing hidesSharedBackground @available check in: ${filePath}`);
+          content = content.replace(/if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{[\s\S]*?item\.hidesSharedBackground[\s\S]*?item\.sharesBackground[\s\S]*?\}/g, replacement);
+          changed = true;
+        }
+      }
+
+      if (path.basename(filePath) === 'RouterToolbarItemView.swift') {
+        // 1. Fix searchBarPlacementBarButtonItem
+        const targetSearch = /guard\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*,\s*let\s+controller\s*=\s*self\.host\?\.findViewController\(\)\s+else\s*\{[\s\S]*?item\s*=\s*controller\.navigationItem\.searchBarPlacementBarButtonItem/g;
+        const replacementSearch = `#if os(visionOS)
+      guard let controller = self.host?.findViewController() else {
+        logger?.warn(
+          "[expo-router] navigationItem.searchBarPlacementBarButtonItem not available. This is most likely a bug in expo-router."
+        )
+        currentBarButtonItem = nil
+        return
+      }
+      guard let navController = controller.navigationController else {
+        currentBarButtonItem = nil
+        return
+      }
+      guard navController.isNavigationBarHidden == false else {
+        logger?.warn(
+          "[expo-router] Toolbar.SearchBarPreferredSlot should only be used when stack header is shown."
+        )
+        currentBarButtonItem = nil
+        return
+      }
+      item = controller.navigationItem.searchBarPlacementBarButtonItem
+      #else
+      logger?.warn("[expo-router] searchBar placement is only supported on visionOS.")
+      currentBarButtonItem = nil
+      return
+      #endif`;
+        
+        if (content.includes('searchBarPlacementBarButtonItem')) {
+          console.log(`Fixing searchBarPlacementBarButtonItem @available check in: ${filePath}`);
+          content = content.replace(targetSearch, replacementSearch);
+          changed = true;
+        }
+
+        // 2. Fix hidesSharedBackground
+        const targetHides = /if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{\s*item\.hidesSharedBackground\s*=\s*hidesSharedBackground[\s\S]*?sharesBackground\s*=\s*sharesBackground\s*\}/g;
+        const replacementHides = `#if os(visionOS)
+    item.hidesSharedBackground = hidesSharedBackground
+    item.sharesBackground = sharesBackground
+    #endif`;
+        if (content.includes('item.hidesSharedBackground = hidesSharedBackground')) {
+          console.log(`Fixing hidesSharedBackground @available check in: ${filePath}`);
+          content = content.replace(targetHides, replacementHides);
+          changed = true;
+        }
+
+        // 3. Fix badge
+        const targetBadge = /if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{\s*if\s+let\s+badgeConfig\s*=\s*badgeConfiguration\s*\{[\s\S]*?item\.badge\s*=\s*nil\s*\}\s*\}/g;
+        const replacementBadge = `#if os(visionOS)
+    if let badgeConfig = badgeConfiguration {
+      var badge = UIBarButtonItem.Badge.indicator()
+      if let value = badgeConfig.value {
+        badge = .string(value)
+      }
+      if let backgroundColor = badgeConfig.backgroundColor {
+        badge.backgroundColor = backgroundColor
+      }
+      if let foregroundColor = badgeConfig.color {
+        badge.foregroundColor = foregroundColor
+      }
+      if badgeConfig.fontFamily != nil || badgeConfig.fontSize != nil
+        || badgeConfig.fontWeight != nil {
+        let font = RouterFontUtils.convertTitleStyleToFont(
+          TitleStyle(
+            fontFamily: badgeConfig.fontFamily,
+            fontSize: badgeConfig.fontSize,
+            fontWeight: badgeConfig.fontWeight
+          ))
+        badge.font = font
+      }
+      item.badge = badge
+    } else {
+      item.badge = nil
+    }
+    #endif`;
+        if (content.includes('UIBarButtonItem.Badge.indicator()')) {
+          console.log(`Fixing badge @available check in: ${filePath}`);
+          content = content.replace(targetBadge, replacementBadge);
+          changed = true;
+        }
+      }
+
+      if (path.basename(filePath) === 'RouterToolbarModule.swift') {
+        const targetStyle = /case\s+\.prominent:\s*if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{\s*return\s+\.prominent\s*\}\s*else\s*\{\s*return\s+\.done\s*\}/g;
+        const replacementStyle = `case .prominent:
+      #if os(visionOS)
+      return .prominent
+      #else
+      return .done
+      #endif`;
+        if (content.includes('.prominent')) {
+          console.log(`Fixing prominent style @available check in: ${filePath}`);
+          content = content.replace(targetStyle, replacementStyle);
+          changed = true;
+        }
+      }
+
       // Fix Task+immediate.swift — Swift 6.0 does not have Task.immediate or
       // Task(executorPreference:), so replace with plain Task(priority:operation:).
       if (path.basename(filePath) === 'Task+immediate.swift' && content.includes('Task.immediate')) {
