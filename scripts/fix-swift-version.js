@@ -141,10 +141,16 @@ if (fs.existsSync(nodeModulesPath)) {
       }
 
       // Fix push_back(consuming:) — Swift 6.0 on Xcode 16.4 does not support the consuming label
-      if (content.includes('vector.push_back(consuming:') && path.basename(filePath) === 'JavaScriptRuntime.swift') {
-        console.log(`Fixing push_back(consuming:) in: ${filePath}`);
-        content = content.replace(/vector\.push_back\(consuming:\s*propNameId\)/g, 'vector.push_back(propNameId)');
-        changed = true;
+      if (path.basename(filePath) === 'JavaScriptRuntime.swift') {
+        if (content.includes('vector.push_back(consuming: propNameId)')) {
+          console.log(`Fixing push_back(consuming:) in: ${filePath}`);
+          content = content.replace('vector.push_back(consuming: propNameId)', 'vector.push_back(consume propNameId)');
+          changed = true;
+        } else if (content.includes('vector.push_back(propNameId)')) {
+          console.log(`Fixing push_back(propNameId) in: ${filePath}`);
+          content = content.replace('vector.push_back(propNameId)', 'vector.push_back(consume propNameId)');
+          changed = true;
+        }
       }
 
       // Fix C++ constructor visibility — Swift 6.0 on Xcode 16.4 cannot see
@@ -203,6 +209,21 @@ inline NativeState *_Nonnull createNativeState(NativeState::Context context, Nat
 
 inline HostFunctionClosure *_Nonnull createHostFunctionClosure(HostFunctionClosure::Context context, HostFunctionClosure::Closure *_Nonnull closure, HostFunctionClosure::Deallocator *_Nonnull deallocator) {
   return new HostFunctionClosure(context, closure, deallocator);
+}`;
+      content = content.replace(target, replacement);
+      changed = true;
+    }
+    if (path.basename(filePath) === 'RuntimeScheduler.h' && !content.includes('createDefaultRuntimeScheduler')) {
+      console.log(`Adding factory functions in RuntimeScheduler.h: ${filePath}`);
+      const target = '} SWIFT_SHARED_REFERENCE(retainRuntimeScheduler, releaseRuntimeScheduler);';
+      const replacement = `} SWIFT_SHARED_REFERENCE(retainRuntimeScheduler, releaseRuntimeScheduler);
+
+inline RuntimeScheduler* _Nonnull createDefaultRuntimeScheduler() {
+  return new RuntimeScheduler();
+}
+
+inline RuntimeScheduler* _Nonnull createRuntimeScheduler(void* _Nullable scheduler, RuntimeScheduler::ScheduleFn _Nonnull fn) {
+  return new RuntimeScheduler(scheduler, fn);
 }`;
       content = content.replace(target, replacement);
       changed = true;
