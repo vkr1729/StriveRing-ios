@@ -20,7 +20,7 @@ function walkDir(dir) {
       if (file === 'Package.swift' || file.endsWith('.swift') || file === 'RuntimeScheduler.h' ||
           file === 'NativeState.h' || file === 'HostFunctionClosure.h' ||
           file === 'HostObjectCallbacks.h' || file === 'HostObject.h' ||
-          file === 'precompiled_modules.rb') {
+          file === 'precompiled_modules.rb' || file.endsWith('.podspec')) {
         results.push(fullPath);
       }
     }
@@ -36,6 +36,15 @@ if (fs.existsSync(nodeModulesPath)) {
   swiftFiles.forEach((filePath) => {
     let content = fs.readFileSync(filePath, 'utf8');
     let changed = false;
+
+    // 0. Fix swift_version in .podspec files to compile in Swift 5 mode
+    if (filePath.endsWith('.podspec')) {
+      if (content.includes("swift_version  = '6.0'") || content.includes("swift_version = '6.0'") || content.includes('swift_version = "6.0"')) {
+        console.log(`Fixing Swift version to 5.9 in podspec: ${filePath}`);
+        content = content.replace(/swift_version\s*=\s*['"]6\.0['"]/g, "swift_version  = '5.9'");
+        changed = true;
+      }
+    }
 
     // 1. Fix Package.swift configurations to force Swift 6.0 mode
     if (path.basename(filePath) === 'Package.swift') {
@@ -197,7 +206,7 @@ if (fs.existsSync(nodeModulesPath)) {
       console.log(`Adding createNativeState factory to NativeState.h: ${filePath}`);
       const target = '} SWIFT_IMMORTAL_REFERENCE; // class NativeState';
       const replacement = `} SWIFT_IMMORTAL_REFERENCE; // class NativeState
-
+ 
 inline NativeState *_Nonnull createNativeState(NativeState::Context context, NativeState::Deallocator *_Nonnull deallocator) {
   return new NativeState(context, deallocator);
 }`;
@@ -208,7 +217,7 @@ inline NativeState *_Nonnull createNativeState(NativeState::Context context, Nat
       console.log(`Adding createHostFunctionClosure factory to HostFunctionClosure.h: ${filePath}`);
       const target = '} SWIFT_IMMORTAL_REFERENCE; // class HostFunctionClosure';
       const replacement = `} SWIFT_IMMORTAL_REFERENCE; // class HostFunctionClosure
-
+ 
 inline HostFunctionClosure *_Nonnull createHostFunctionClosure(HostFunctionClosure::Context context, HostFunctionClosure::Closure *_Nonnull closure, HostFunctionClosure::Deallocator *_Nonnull deallocator) {
   return new HostFunctionClosure(context, closure, deallocator);
 }`;
@@ -219,11 +228,11 @@ inline HostFunctionClosure *_Nonnull createHostFunctionClosure(HostFunctionClosu
       console.log(`Adding factory functions in RuntimeScheduler.h: ${filePath}`);
       const target = '} SWIFT_SHARED_REFERENCE(retainRuntimeScheduler, releaseRuntimeScheduler);';
       const replacement = `} SWIFT_SHARED_REFERENCE(retainRuntimeScheduler, releaseRuntimeScheduler);
-
+ 
 inline RuntimeScheduler* _Nonnull createDefaultRuntimeScheduler() {
   return new RuntimeScheduler();
 }
-
+ 
 inline RuntimeScheduler* _Nonnull createRuntimeScheduler(void* _Nullable scheduler, RuntimeScheduler::ScheduleFn _Nonnull fn) {
   return new RuntimeScheduler(scheduler, fn);
 }`;
