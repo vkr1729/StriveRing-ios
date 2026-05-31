@@ -19,7 +19,8 @@ function walkDir(dir) {
     } else {
       if (file === 'Package.swift' || file.endsWith('.swift') || file === 'RuntimeScheduler.h' ||
           file === 'NativeState.h' || file === 'HostFunctionClosure.h' ||
-          file === 'HostObjectCallbacks.h' || file === 'HostObject.h') {
+          file === 'HostObjectCallbacks.h' || file === 'HostObject.h' ||
+          file === 'precompiled_modules.rb') {
         results.push(fullPath);
       }
     }
@@ -240,6 +241,15 @@ inline RuntimeScheduler* _Nonnull createRuntimeScheduler(void* _Nullable schedul
       const target = `  inline std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &runtime) override {\n    return _callbacks.getPropertyNames();\n  }`;
       const replacement = `  inline std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &runtime) override {\n    auto names = _callbacks.getPropertyNames();\n    std::vector<jsi::PropNameID> result;\n    result.reserve(names.size());\n    for (const auto &name : names) {\n      result.push_back(jsi::PropNameID::forUtf8(runtime, name));\n    }\n    return result;\n  }`;
       content = content.replace(target, replacement);
+      changed = true;
+    }
+    if (path.basename(filePath) === 'precompiled_modules.rb' && !content.includes('return false\n        return false unless') && !content.includes('return false\r\n        return false unless')) {
+      console.log(`Disabling precompiled modules in: ${filePath}`);
+      if (content.includes('\r\n')) {
+        content = content.replace('def enabled?', 'def enabled?\r\n        return false');
+      } else {
+        content = content.replace('def enabled?', 'def enabled?\n        return false');
+      }
       changed = true;
     }
 
