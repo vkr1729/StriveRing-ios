@@ -1,56 +1,95 @@
-# Welcome to your Expo app 👋
+<img src="screenshots/strivering_app_icon.png" width="128" align="right" alt="StriveRing Premium Logo" style="border-radius: 28px; box-shadow: 0px 8px 24px rgba(0, 229, 160, 0.2);"/>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# StriveRing ⚡️
+### Premium Cybernetic Wellness & Habit Tracker for iOS
 
-## Get started
+[![iOS Native Widgets](https://img.shields.io/badge/iOS-SwiftUI%20Widgets-00e5a0?style=for-the-badge&logo=apple)](https://developer.apple.com/xcode/)
+[![Dynamic Island](https://img.shields.io/badge/Dynamic%20Island-Live%20Activities-a78bfa?style=for-the-badge&logo=swift)](https://developer.apple.com/design/human-interface-guidelines/live-activities)
+[![Expo Framework](https://img.shields.io/badge/Expo-Managed%20Workflow-08090c?style=for-the-badge&logo=expo)](https://expo.dev)
 
-1. Install dependencies
+A modern, ultra-premium wellness tracker designed for athletes and high-performers. StriveRing features a gorgeous glassmorphic interface, a responsive score-tracking biometric ring, native SwiftUI Home Screen Widgets, and Dynamic Island Live Activities that keep your real-time timers and performance metrics accessible at a glance.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 📸 Interface & Testing Highlights
 
-   ```bash
-   npx expo start
-   ```
+### Native App Experience
+<p align="center">
+  <img src="screenshots/test_step_1_focus_30.png" width="30%" alt="Focus session" style="border-radius: 12px; margin-right: 2%;"/>
+  <img src="screenshots/test_step_2_add_modal.png" width="30%" alt="Edit habits" style="border-radius: 12px; margin-right: 2%;"/>
+  <img src="screenshots/test_step_5_analytics_dashboard.png" width="30%" alt="Analytics dashboard" style="border-radius: 12px;"/>
+</p>
 
-In the output, you'll find options to open the app in a
+### Home Screen Widgets & Dynamic Island
+<p align="center">
+  <img src="screenshots/strivering_widgets_render.png" width="90%" alt="Widgets & Live Activities" style="border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);"/>
+</p>
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## ✨ Features
 
-## Get a fresh project
+- 🌀 **Responsive Biometric Ring**: Markerless biometric ring that beautifully transitions from glowing Crimson ➔ Amber ➔ Neon Teal as you accumulate daily strain score.
+- 🎛️ **Premium Control Dock**: Glassmorphic, frosted-glass control overlay featuring haptic response triggers to play, pause, or simulated-fast-forward (`+1 hr`) background stopwatch sessions.
+- 📱 **SwiftUI Home Screen Widgets**: Small & Medium widgets reflecting overall daily strain score and active target percentages using high-performance user default container syncing.
+- 🏝️ **Dynamic Island & Live Activities**: Monospaced system timer updating seamlessly within the lock screen and Dynamic Island (Compact & Expanded layouts) via standard Apple iOS ActivityKit.
+- 📊 **Wellness Analytics & Historical View**: Minimalist weekly calendar with read-only swipe navigation to inspect past completed strains.
+- 🔒 **Privacy-First Storage**: Secure local-first persistence driven by optimized AsyncStorage middleware.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## 🏛️ System Architecture
+
+StriveRing is built using a modern **hybrid prebuild architecture** that allows React Native's state engine to communicate with iOS's native SwiftUI targets without maintaining bloated Xcode folders in the main repository:
+
+```
+┌─────────────────────────────────┐
+│     React Native State Engine   │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐     Native Module
+│   Shared App Group Defaults     │ ───────────────┐
+└────────────────┬────────────────┘                │
+                 │                                 ▼
+                 ▼                        ┌─────────────────────────────────┐
+┌─────────────────────────────────┐       │   ActivityKit SwiftUI Bridge    │
+│     SwiftUI Home Screen Widget  │       └────────────────┬────────────────┘
+└─────────────────────────────────┘                        │
+                                                           ▼
+                                          ┌─────────────────────────────────┐
+                                          │   Dynamic Island Live Activity  │
+                                          └─────────────────────────────────┘
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## 🚀 100% Free PC-Free Sideloading (No Developer Account Needed)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+We have bypassed Apple's $99/year developer fee by combining a **free GitHub Actions CI/CD workflow** (which builds an unsigned `.ipa` for physical devices) with **SideStore** (which signs and refreshes the app entirely on your phone via a local VPN loopback, meaning you never need a computer after setup!).
 
-## Learn more
+### Quick Setup Blueprint:
+1. **Trigger the GitHub Build**: Go to your repository's **Actions** tab, select **Build Unsigned iOS IPA**, and click **Run workflow**. Download your compiled `StriveRing.ipa` when finished.
+2. **Install SideStore**: Run the pre-configured [iLoader AppImage](file:///home/kedarnath-reddy-vallaboina/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage) GUI on your Linux desktop once to sideload SideStore onto your connected iPhone.
+3. **Sideload StriveRing**: Download the `.ipa` onto your phone and import it into SideStore wirelessly over WireGuard.
 
-To learn more about developing your project with Expo, look at the following resources:
+For the exact, comprehensive step-by-step tutorial, open the **[Linux SideStore Sideloading Guide](sidestore_linux_sideloading_guide.md)** inside this repository!
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 💻 Local Development
 
-Join our community of developers creating universal apps.
+### 1. Install dependencies
+```bash
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 2. Start development server
+```bash
+npx expo start
+```
+
+### 3. Generate native iOS project folders
+```bash
+npx expo prebuild --platform ios
+```
