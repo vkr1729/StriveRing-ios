@@ -1,0 +1,64 @@
+name: Build Unsigned iOS IPA
+
+on:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  build:
+    name: Build Unsigned IPA
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup CocoaPods cache
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Run Expo Prebuild
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Build Unsigned App Archive
+        run: |
+          xcodebuild -workspace ios/StriveRing.xcworkspace \
+                     -scheme StriveRing \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     CODE_SIGNING_ALLOWED=NO \
+                     CODE_SIGNING_REQUIRED=NO \
+                     CODE_SIGN_IDENTITY="" \
+                     clean archive \
+                     -archivePath build/StriveRing.xcarchive
+
+      - name: Package Unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r build/StriveRing.xcarchive/Products/Applications/StriveRing.app build/Payload/
+          cd build
+          zip -r StriveRing.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StriveRing-unsigned-ipa
+          path: build/StriveRing.ipa
+          retention-days: 7

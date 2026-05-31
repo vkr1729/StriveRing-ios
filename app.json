@@ -10,10 +10,15 @@
     "backgroundColor": "#08090c",
     "ios": {
       "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.strivering.app",
       "entitlements": {
         "com.apple.security.application-groups": [
+          "group.com.strivering.app",
           "group.com.strivering.app"
         ]
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -46,6 +51,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "29d723c4-fd2a-4c3e-bc60-ed00d54504ed"
+      }
+    },
+    "owner": "vkr1729"
   }
 }
