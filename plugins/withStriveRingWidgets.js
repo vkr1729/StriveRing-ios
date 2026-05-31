@@ -65,7 +65,8 @@ function withStriveRingWidgets(config) {
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
       `);
-      project.addHeaderFile(bridgingHeaderName);
+      const mainGroup = project.getFirstProject().firstProject.mainGroup;
+      project.addFile(bridgingHeaderName, mainGroup);
     }
     
     return config;
