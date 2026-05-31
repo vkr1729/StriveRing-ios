@@ -49,7 +49,7 @@ function withStriveRingWidgets(config) {
         fs.copyFileSync(srcPath, destPath);
         
         // Link to Xcode Project
-        const fileRef = project.addFile(path.join(mainTargetName, filename), project.getFirstProject().firstObject.mainGroup);
+        const fileRef = project.addFile(path.join(mainTargetName, filename), project.getFirstProject().firstProject.mainGroup);
         const uuid = project.getFirstTarget().uuid;
         project.addToPbxBuildFileSection(fileRef);
         project.addToPbxSourcesBuildPhase(fileRef);
