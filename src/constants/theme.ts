@@ -1,65 +1,85 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import '@/global.css';
-
-import { Platform } from 'react-native';
+import type { Habit } from '@/types';
 
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+  background: '#060a10',
+  surface: '#0d1117',
+  surfaceAlt: '#161b22',
+  text: '#f0f3f5',
+  textSecondary: '#6e7681',
+  border: '#1c2128',
+  accent: '#00e5a0',
+  accentDim: 'rgba(0, 229, 160, 0.15)',
+  strainAmber: '#ffb800',
+  strainRed: '#ff3b30',
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export const Glass = {
+  light: 'rgba(255, 255, 255, 0.04)',
+  medium: 'rgba(255, 255, 255, 0.07)',
+  strong: 'rgba(255, 255, 255, 0.10)',
+  border: 'rgba(255, 255, 255, 0.08)',
+} as const;
+
+export const Gradients = {
+  accentStart: '#00e5a0',
+  accentEnd: '#00b4d8',
+  strainStart: '#ffb800',
+  strainEnd: '#ff3b30',
+  ringTrack: '#1c2128',
+} as const;
+
+export const Fonts = {
+  mono: 'ui-monospace',
+};
 
 export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
+  half: 4,
+  one: 8,
+  two: 16,
+  three: 24,
+  four: 32,
+  five: 48,
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const RING_RADIUS = 100;
+export const RING_STROKE_WIDTH = 8;
+export const RING_CIRCUMFERENCE = Math.round(2 * Math.PI * RING_RADIUS);
+export const RING_VIEWBOX = '0 0 240 240';
+export const RING_CENTER = 120;
+
+export const DEFAULT_DAILY_TARGET = 100;
+
+export const DEFAULT_HABITS: Habit[] = [
+  {
+    id: 'default-focus',
+    name: 'Focus Work',
+    pointsPerHour: 6,
+    accentColor: '#00e5a0',
+    createdAt: 0,
+  },
+  {
+    id: 'default-sleep',
+    name: 'Sleep',
+    pointsPerHour: 15,
+    accentColor: '#a78bfa',
+    createdAt: 0,
+    minimumHours: 6,
+  },
+  {
+    id: 'default-workout',
+    name: 'Workout',
+    pointsPerHour: 20,
+    accentColor: '#00b4d8',
+    createdAt: 0,
+  },
+  {
+    id: 'default-family',
+    name: 'Family Time',
+    pointsPerHour: 10,
+    accentColor: '#ffb800',
+    createdAt: 0,
+  },
+];

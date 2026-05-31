@@ -1,18 +1,24 @@
 {
   "expo": {
-    "name": "tempo-ring-ios",
-    "slug": "tempo-ring-ios",
+    "name": "StriveRing",
+    "slug": "strivering-ios",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "temporingios",
-    "userInterfaceStyle": "automatic",
+    "scheme": "striveringios",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#08090c",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.strivering.app"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#08090c",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -28,13 +34,14 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#08090c",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "./plugins/withStriveRingWidgets"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -41,3 +41,9 @@ example
 # generated native folders
 /ios
 /android
+GEMINI.md
+CLAUDE.md
+AGENTS.md
+implementation_plan.md
+success_criteria.md
+antigravity-init.sh
