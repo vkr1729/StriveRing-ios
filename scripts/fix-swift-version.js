@@ -165,6 +165,39 @@ if (fs.existsSync(nodeModulesPath)) {
         }
       }
 
+      // Fix visionOS/iOS 26 drawOn/drawOff symbol effects in expo-image
+      if (path.basename(filePath) === 'ImageView.swift') {
+        const target = 'private func applySymbolEffectiOS26(effect: SFSymbolEffectType, scope: SFSymbolEffectScope?, options: SymbolEffectOptions) {';
+        if (content.includes(target)) {
+          console.log(`Fixing applySymbolEffectiOS26 in: ${filePath}`);
+          content = content.replace(/private\s+func\s+applySymbolEffectiOS26\([\s\S]*?default:\s*break\s*\}\s*\}/g, 'private func applySymbolEffectiOS26(effect: SFSymbolEffectType, scope: SFSymbolEffectScope?, options: SymbolEffectOptions) {}');
+          changed = true;
+        }
+      }
+
+      // Fix visionOS/iOS 26 drawOn/drawOff symbol effects in @expo/ui
+      if (path.basename(filePath) === 'SymbolEffectModifier.swift') {
+        if (content.includes('buildDrawOnEffect')) {
+          console.log(`Wrapping iOS 26 drawOn/drawOff functions in: ${filePath}`);
+          content = content.replace(
+            /@available\(iOS 26\.0,\s*tvOS\s*26\.0,\s*\*\)\s*private\s+func\s+buildDrawOnEffect[\s\S]*?default:\s*played\s*\}\s*\}/g,
+            (match) => `#if false\n${match}\n#endif`
+          );
+          changed = true;
+        }
+        if (content.includes('case .drawOn:')) {
+          console.log(`Fixing drawOn/drawOff symbolEffect calls in: ${filePath}`);
+          content = content.replace(
+            /case\s+\.drawOn:\s*if\s+#available\s*\(\s*iOS\s+26\.0[\s\S]*?case\s+\.drawOff:\s*if\s+#available\s*\(\s*iOS\s+26\.0[\s\S]*?\}\s*else\s*\{\s*view\s*\}/g,
+            `case .drawOn:
+    view
+  case .drawOff:
+    view`
+          );
+          changed = true;
+        }
+      }
+
       // Fix visionOS-only APIs in expo-router
       if (path.basename(filePath) === 'RouterToolbarHostView.swift') {
         const replacement = `#if os(visionOS)
