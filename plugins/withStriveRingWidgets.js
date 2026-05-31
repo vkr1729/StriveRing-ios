@@ -48,18 +48,15 @@ function withStriveRingWidgets(config) {
       if (fs.existsSync(srcPath)) {
         fs.copyFileSync(srcPath, destPath);
         
-        // Link to Xcode Project
-        const fileRef = project.addFile(path.join(mainTargetName, filename), project.getFirstProject().firstProject.mainGroup);
-        if (fileRef) {
-          project.addToPbxBuildFileSection(fileRef);
-          project.addToPbxSourcesBuildPhase(fileRef);
-        }
+        // Link to Xcode Project using addSourceFile to ensure a valid uuid is generated
+        const filePath = path.join(mainTargetName, filename);
+        project.addSourceFile(filePath, null, project.getFirstProject().firstProject.mainGroup);
       }
     });
 
     // Write bridging header to enable Swift inside the Objective-C project
     const bridgingHeaderName = `${appName}-Bridging-Header.h`;
-    const bridgingHeaderPath = path.join(iosRoot, bridgingHeaderName);
+    const bridgingHeaderPath = path.join(iosRoot, mainTargetName, bridgingHeaderName);
     if (!fs.existsSync(bridgingHeaderPath)) {
       fs.writeFileSync(bridgingHeaderPath, `
 // StriveRing Auto-Generated Bridging Header
@@ -67,7 +64,7 @@ function withStriveRingWidgets(config) {
 #import <React/RCTEventEmitter.h>
       `);
       const mainGroup = project.getFirstProject().firstProject.mainGroup;
-      project.addFile(bridgingHeaderName, mainGroup);
+      project.addFile(path.join(mainTargetName, bridgingHeaderName), mainGroup);
     }
     
     return config;
