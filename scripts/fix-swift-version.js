@@ -58,6 +58,13 @@ if (fs.existsSync(nodeModulesPath)) {
         changed = true;
       }
 
+      // Fix trailing comma before closing paren in Swift typealias (Swift 6 rejects trailing comma after last param)
+      if (content.includes('_ arguments: consuming JavaScriptValuesBuffer,')) {
+        console.log(`Fixing trailing comma in typealias: ${filePath}`);
+        content = content.replace('_ arguments: consuming JavaScriptValuesBuffer,\n  ) async throws -> JavaScriptValue', '_ arguments: consuming JavaScriptValuesBuffer\n  ) async throws -> JavaScriptValue');
+        changed = true;
+      }
+
       // Fix regex literal in Swift 5 compatibility mode
       if (content.includes('/^[a-zA-Z_$][a-zA-Z0-9_$]*$/')) {
         console.log(`Fixing Swift 5 regex literal in: ${filePath}`);
