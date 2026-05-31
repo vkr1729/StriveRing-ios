@@ -17,7 +17,8 @@ function walkDir(dir) {
         results = results.concat(walkDir(fullPath));
       }
     } else {
-      if (file === 'Package.swift' || file.endsWith('.swift') || file === 'RuntimeScheduler.h') {
+      if (file === 'Package.swift' || file.endsWith('.swift') || file === 'RuntimeScheduler.h' ||
+          file === 'NativeState.h' || file === 'HostFunctionClosure.h') {
         results.push(fullPath);
       }
     }
@@ -58,7 +59,7 @@ if (fs.existsSync(nodeModulesPath)) {
         changed = true;
       }
 
-      // Fix trailing comma before closing paren in Swift typealias (Swift 6 rejects trailing comma after last param)
+      // Fix trailing comma before closing paren in Swift typealiases (Swift 6 rejects trailing comma after last param)
       if (content.includes('_ arguments: consuming JavaScriptValuesBuffer,')) {
         console.log(`Fixing trailing comma in typealias: ${filePath}`);
         content = content.replace('_ arguments: consuming JavaScriptValuesBuffer,\n  ) async throws -> JavaScriptValue', '_ arguments: consuming JavaScriptValuesBuffer\n  ) async throws -> JavaScriptValue');
@@ -94,16 +95,117 @@ if (fs.existsSync(nodeModulesPath)) {
         changed = true;
       }
 
-      // Fix Task+immediate.swift — Task(name:priority:operation:) was renamed to
-      // Task(executorPreference:priority:operation:) in Swift 6.0.
-      if (path.basename(filePath) === 'Task+immediate.swift' && content.includes('Task(name: name, priority: .high, operation: operation)')) {
-        console.log(`Fixing Task initializer in: ${filePath}`);
+      // Fix Task+immediate.swift — Swift 6.0 does not have Task.immediate or
+      // Task(executorPreference:), so replace with plain Task(priority:operation:).
+      if (path.basename(filePath) === 'Task+immediate.swift' && content.includes('Task.immediate')) {
+        console.log(`Fixing Task+immediate polyfill in: ${filePath}`);
+        // Replace the entire `if #available / else` block with a simple fallback
+        const target = `    if #available(macOS 26.0, iOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+      return Task.immediate(name: name, priority: priority, operation: operation)
+    } else {
+      // In the polyfill always use the highest priority and hope it executes earlier.
+      return Task(name: name, priority: .high, operation: operation)
+    }`;
+        const replacement = `    // Task.immediate is not available on this OS version; use plain Task as a fallback.
+    return Task(priority: priority ?? .high, operation: operation)`;
+        if (content.includes(target)) {
+          content = content.replace(target, replacement);
+          changed = true;
+        } else {
+          // Might already be patched differently, try a broader replace
+          if (content.includes('Task(name: name, priority: .high, operation: operation)')) {
+            content = content.replace(
+              /return Task\(name: name, priority: \.high, operation: operation\)/g,
+              'return Task(priority: priority ?? .high, operation: operation)'
+            );
+            // Also remove the #available branch if present
+            content = content.replace(
+              /if #available\(macOS 26\.0, iOS 26\.0, watchOS 26\.0, tvOS 26\.0, \*\) \{\s*return Task\.immediate\(name: name, priority: priority, operation: operation\)\s*\} else \{\s*/g,
+              '// Task.immediate is not available on this OS version; use plain Task as a fallback.\n    '
+            );
+            if (content.includes('return Task.immediate')) {
+              // Strip the entire #available block, keep only the fallback
+              const funcStart = content.indexOf('public static func immediate_polyfill(');
+              const firstBrace = content.indexOf('{', funcStart);
+              const returnStmt = content.indexOf('return Task(priority:', firstBrace);
+              if (returnStmt > 0) {
+                const afterReturn = content.indexOf('\n', returnStmt);
+                const closingBrace = content.indexOf('}', afterReturn);
+                content = content.substring(0, firstBrace + 1) + '\n    return Task(priority: priority ?? .high, operation: operation)\n  }';
+                console.log('Replaced entire Task+immediate function body');
+              }
+            }
+            changed = true;
+          }
+        }
+      }
+
+      // Fix push_back(consuming:) — Swift 6.0 on Xcode 16.4 does not support the consuming label
+      if (content.includes('vector.push_back(consuming:') && path.basename(filePath) === 'JavaScriptRuntime.swift') {
+        console.log(`Fixing push_back(consuming:) in: ${filePath}`);
+        content = content.replace(/vector\.push_back\(consuming:\s*propNameId\)/g, 'vector.push_back(propNameId)');
+        changed = true;
+      }
+
+      // Fix C++ constructor visibility — Swift 6.0 on Xcode 16.4 cannot see
+      // C++ constructors on SWIFT_SHARED_REFERENCE types. Use factory functions.
+      if (path.basename(filePath) === 'JavaScriptRuntime.swift') {
+        // expo.RuntimeScheduler() -> expo.createDefaultRuntimeScheduler()
+        if (content.includes('self.scheduler = expo.RuntimeScheduler()')) {
+          console.log(`Replacing expo.RuntimeScheduler() constructors in: ${filePath}`);
+          content = content.replace(/self\.scheduler\s*=\s*expo\.RuntimeScheduler\(\)/g, 'self.scheduler = expo.createDefaultRuntimeScheduler()');
+          changed = true;
+        }
+        // expo.RuntimeScheduler(scheduler, fn) -> expo.createRuntimeScheduler(scheduler, fn)
+        if (content.includes('self.scheduler = expo.RuntimeScheduler(scheduler, fn)')) {
+          console.log(`Replacing expo.RuntimeScheduler(scheduler, fn) in: ${filePath}`);
+          content = content.replace('self.scheduler = expo.RuntimeScheduler(scheduler, fn)', 'self.scheduler = expo.createRuntimeScheduler(scheduler, fn)');
+          changed = true;
+        }
+        // expo.HostFunctionClosure(context, call, deallocate) -> expo.createHostFunctionClosure(...)
+        if (content.includes('return expo.HostFunctionClosure(context, call, deallocate)')) {
+          console.log(`Replacing expo.HostFunctionClosure constructor in: ${filePath}`);
+          content = content.replace(
+            'return expo.HostFunctionClosure(context, call, deallocate)',
+            'return expo.createHostFunctionClosure(context, call, deallocate)'
+          );
+          changed = true;
+        }
+      }
+
+      // expo.NativeState(ptr, deallocate) -> expo.createNativeState(ptr, deallocate)
+      if (path.basename(filePath) === 'JavaScriptNativeState.swift' && content.includes('self.pointee = expo.NativeState(ptr, deallocate)')) {
+        console.log(`Replacing expo.NativeState constructor in: ${filePath}`);
         content = content.replace(
-          'return Task(name: name, priority: .high, operation: operation)',
-          'return Task(executorPreference: .global(qos: .userInitiated), priority: .high, operation: operation)'
+          'self.pointee = expo.NativeState(ptr, deallocate)',
+          'self.pointee = expo.createNativeState(ptr, deallocate)'
         );
         changed = true;
       }
+    }
+
+    // 3. Add factory functions to C++ headers so Swift can construct these types
+    if (path.basename(filePath) === 'NativeState.h' && !content.includes('createNativeState')) {
+      console.log(`Adding createNativeState factory to NativeState.h: ${filePath}`);
+      const target = '} SWIFT_IMMORTAL_REFERENCE; // class NativeState';
+      const replacement = `} SWIFT_IMMORTAL_REFERENCE; // class NativeState
+
+inline NativeState *_Nonnull createNativeState(NativeState::Context context, NativeState::Deallocator *_Nonnull deallocator) {
+  return new NativeState(context, deallocator);
+}`;
+      content = content.replace(target, replacement);
+      changed = true;
+    }
+    if (path.basename(filePath) === 'HostFunctionClosure.h' && !content.includes('createHostFunctionClosure')) {
+      console.log(`Adding createHostFunctionClosure factory to HostFunctionClosure.h: ${filePath}`);
+      const target = '} SWIFT_IMMORTAL_REFERENCE; // class HostFunctionClosure';
+      const replacement = `} SWIFT_IMMORTAL_REFERENCE; // class HostFunctionClosure
+
+inline HostFunctionClosure *_Nonnull createHostFunctionClosure(HostFunctionClosure::Context context, HostFunctionClosure::Closure *_Nonnull closure, HostFunctionClosure::Deallocator *_Nonnull deallocator) {
+  return new HostFunctionClosure(context, closure, deallocator);
+}`;
+      content = content.replace(target, replacement);
+      changed = true;
     }
 
     if (changed) {
