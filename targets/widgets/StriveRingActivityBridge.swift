@@ -116,3 +116,28 @@ class StriveRingActivityBridge: NSObject {
         self.currentActivity = nil
     }
 }
+
+// ActivityAttributes structure required by StriveRingActivityBridge
+public struct StriveRingAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        public var liveScore: Int
+        public var totalScore: Int
+        public var target: Int
+        public var habitName: String
+        public var elapsedMs: Double
+
+        public init(liveScore: Int, totalScore: Int, target: Int, habitName: String, elapsedMs: Double) {
+            self.liveScore = liveScore
+            self.totalScore = totalScore
+            self.target = target
+            self.habitName = habitName
+            self.elapsedMs = elapsedMs
+        }
+    }
+
+    public var habitId: String
+
+    public init(habitId: String) {
+        self.habitId = habitId
+    }
+}
