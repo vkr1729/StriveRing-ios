@@ -106,6 +106,65 @@ if (fs.existsSync(nodeModulesPath)) {
         changed = true;
       }
 
+      // Fix invalid @MainActor conformance syntax in SwiftUI classes/extensions
+      if (path.basename(filePath) === 'SwiftUIHostingView.swift') {
+        const target = 'public final class HostingView<Props: ViewProps, ContentView: View<Props>>: ExpoView, @MainActor AnyExpoSwiftUIHostingView {';
+        const replacement = '@MainActor\n  public final class HostingView<Props: ViewProps, ContentView: View<Props>>: ExpoView, AnyExpoSwiftUIHostingView {';
+        if (content.includes(target)) {
+          console.log(`Fixing @MainActor on class HostingView in: ${filePath}`);
+          content = content.replace(target, replacement);
+          changed = true;
+        }
+      }
+
+      if (path.basename(filePath) === 'SwiftUIVirtualView.swift') {
+        // 1. final class SwiftUIVirtualView
+        const target1 = 'final class SwiftUIVirtualView<Props: ViewProps, ContentView: View<Props>>: SwiftUIVirtualViewObjC, @MainActor ExpoSwiftUIView {';
+        const replacement1 = '@MainActor\n  final class SwiftUIVirtualView<Props: ViewProps, ContentView: View<Props>>: SwiftUIVirtualViewObjC, ExpoSwiftUIView {';
+        if (content.includes(target1)) {
+          console.log(`Fixing @MainActor on class SwiftUIVirtualView in: ${filePath}`);
+          content = content.replace(target1, replacement1);
+          changed = true;
+        }
+
+        // 2. extension ExpoSwiftUI.SwiftUIVirtualView: @MainActor
+        const target2 = 'extension ExpoSwiftUI.SwiftUIVirtualView: @MainActor ExpoSwiftUI.ViewWrapper {';
+        const replacement2 = '@MainActor\nextension ExpoSwiftUI.SwiftUIVirtualView: ExpoSwiftUI.ViewWrapper {';
+        if (content.includes(target2)) {
+          console.log(`Fixing @MainActor on extension SwiftUIVirtualView in: ${filePath}`);
+          content = content.replace(target2, replacement2);
+          changed = true;
+        }
+
+        // 3. final class SwiftUIVirtualViewDev
+        const target3 = 'final class SwiftUIVirtualViewDev<Props: ViewProps, ContentView: View<Props>>: SwiftUIVirtualViewObjCDev, @MainActor ExpoSwiftUIView {';
+        const replacement3 = '@MainActor\n  final class SwiftUIVirtualViewDev<Props: ViewProps, ContentView: View<Props>>: SwiftUIVirtualViewObjCDev, ExpoSwiftUIView {';
+        if (content.includes(target3)) {
+          console.log(`Fixing @MainActor on class SwiftUIVirtualViewDev in: ${filePath}`);
+          content = content.replace(target3, replacement3);
+          changed = true;
+        }
+
+        // 4. extension ExpoSwiftUI.SwiftUIVirtualViewDev: @MainActor
+        const target4 = 'extension ExpoSwiftUI.SwiftUIVirtualViewDev: @MainActor ExpoSwiftUI.ViewWrapper {';
+        const replacement4 = '@MainActor\nextension ExpoSwiftUI.SwiftUIVirtualViewDev: ExpoSwiftUI.ViewWrapper {';
+        if (content.includes(target4)) {
+          console.log(`Fixing @MainActor on extension SwiftUIVirtualViewDev in: ${filePath}`);
+          content = content.replace(target4, replacement4);
+          changed = true;
+        }
+      }
+
+      if (path.basename(filePath) === 'ViewDefinition.swift') {
+        const target = 'extension UIView: @MainActor AnyArgument {';
+        const replacement = '@MainActor\nextension UIView: AnyArgument {';
+        if (content.includes(target)) {
+          console.log(`Fixing @MainActor on extension UIView in: ${filePath}`);
+          content = content.replace(target, replacement);
+          changed = true;
+        }
+      }
+
       // Fix Task+immediate.swift — Swift 6.0 does not have Task.immediate or
       // Task(executorPreference:), so replace with plain Task(priority:operation:).
       if (path.basename(filePath) === 'Task+immediate.swift' && content.includes('Task.immediate')) {
