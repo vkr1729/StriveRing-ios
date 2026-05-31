@@ -18,7 +18,8 @@ function walkDir(dir) {
       }
     } else {
       if (file === 'Package.swift' || file.endsWith('.swift') || file === 'RuntimeScheduler.h' ||
-          file === 'NativeState.h' || file === 'HostFunctionClosure.h') {
+          file === 'NativeState.h' || file === 'HostFunctionClosure.h' ||
+          file === 'HostObjectCallbacks.h' || file === 'HostObject.h') {
         results.push(fullPath);
       }
     }
@@ -140,15 +141,15 @@ if (fs.existsSync(nodeModulesPath)) {
         }
       }
 
-      // Fix push_back(consuming:) — Swift 6.0 on Xcode 16.4 does not support the consuming label
+      // Fix push_back(consuming:) and type conversion to avoid move-only PropNameID vector in Swift
       if (path.basename(filePath) === 'JavaScriptRuntime.swift') {
-        if (content.includes('vector.push_back(consuming: propNameId)')) {
-          console.log(`Fixing push_back(consuming:) in: ${filePath}`);
-          content = content.replace('vector.push_back(consuming: propNameId)', 'vector.push_back(consume propNameId)');
-          changed = true;
-        } else if (content.includes('vector.push_back(propNameId)')) {
-          console.log(`Fixing push_back(propNameId) in: ${filePath}`);
-          content = content.replace('vector.push_back(propNameId)', 'vector.push_back(consume propNameId)');
+        const targetStr = 'let propNameId = facebook.jsi.PropNameID.forUtf8(runtime.pointee, std.string(propertyName))';
+        if (content.includes(targetStr)) {
+          console.log(`Fixing PropNameID loop via string replacement in: ${filePath}`);
+          content = content.replace(targetStr, '');
+          content = content.replace('vector.push_back(consuming: propNameId)', 'vector.push_back(std.string(propertyName))');
+          content = content.replace('vector.push_back(consume propNameId)', 'vector.push_back(std.string(propertyName))');
+          content = content.replace('vector.push_back(propNameId)', 'vector.push_back(std.string(propertyName))');
           changed = true;
         }
       }
@@ -225,6 +226,19 @@ inline RuntimeScheduler* _Nonnull createDefaultRuntimeScheduler() {
 inline RuntimeScheduler* _Nonnull createRuntimeScheduler(void* _Nullable scheduler, RuntimeScheduler::ScheduleFn _Nonnull fn) {
   return new RuntimeScheduler(scheduler, fn);
 }`;
+      content = content.replace(target, replacement);
+      changed = true;
+    }
+    if (path.basename(filePath) === 'HostObjectCallbacks.h' && !content.includes('using PropNameIds = std::vector<std::string>;')) {
+      console.log(`Patching HostObjectCallbacks.h: ${filePath}`);
+      content = content.replace('#include <jsi/jsi.h>', '#include <jsi/jsi.h>\n#include <string>');
+      content = content.replace('using PropNameIds = std::vector<facebook::jsi::PropNameID>;', 'using PropNameIds = std::vector<std::string>;');
+      changed = true;
+    }
+    if (path.basename(filePath) === 'HostObject.h' && !content.includes('auto names = _callbacks.getPropertyNames();')) {
+      console.log(`Patching HostObject.h: ${filePath}`);
+      const target = `  inline std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &runtime) override {\n    return _callbacks.getPropertyNames();\n  }`;
+      const replacement = `  inline std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &runtime) override {\n    auto names = _callbacks.getPropertyNames();\n    std::vector<jsi::PropNameID> result;\n    result.reserve(names.size());\n    for (const auto &name : names) {\n      result.push_back(jsi::PropNameID::forUtf8(runtime, name));\n    }\n    return result;\n  }`;
       content = content.replace(target, replacement);
       changed = true;
     }
