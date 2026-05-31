@@ -34,7 +34,7 @@ if (fs.existsSync(nodeModulesPath)) {
     let content = fs.readFileSync(filePath, 'utf8');
     let changed = false;
 
-    // 1. Fix Package.swift configurations
+    // 1. Fix Package.swift configurations to force Swift 5 mode
     if (path.basename(filePath) === 'Package.swift') {
       if (content.includes('swift-tools-version: 6.2') || content.includes('swift-tools-version:6.2')) {
         console.log(`Fixing Swift tools version in: ${filePath}`);
@@ -48,7 +48,7 @@ if (fs.existsSync(nodeModulesPath)) {
       }
     }
 
-    // 2. Fix Swift 6 compiler errors in Swift files
+    // 2. Fix Swift 6 compiler errors & Swift 5 compat issues in Swift files
     if (filePath.endsWith('.swift')) {
       if (content.includes('weak let')) {
         content = content.replace(/\bweak\s+let\b/g, 'weak var');
@@ -61,6 +61,12 @@ if (fs.existsSync(nodeModulesPath)) {
         if (content !== original) {
           changed = true;
         }
+      }
+      if (content.includes('/^[a-zA-Z_$][a-zA-Z0-9_$]*$/')) {
+        // Fix regex literal in Swift 5 mode (JavaScriptRuntime.swift:299)
+        console.log(`Fixing Swift 5 regex literal in: ${filePath}`);
+        content = content.replace('/^[a-zA-Z_$][a-zA-Z0-9_$]*$/', 'try! Regex("^[a-zA-Z_$][a-zA-Z0-9_$]*$")');
+        changed = true;
       }
     }
 
