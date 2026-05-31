@@ -34,11 +34,16 @@ if (fs.existsSync(nodeModulesPath)) {
     let content = fs.readFileSync(filePath, 'utf8');
     let changed = false;
 
-    // 1. Fix swift-tools-version in Package.swift files
+    // 1. Fix Package.swift configurations
     if (path.basename(filePath) === 'Package.swift') {
       if (content.includes('swift-tools-version: 6.2') || content.includes('swift-tools-version:6.2')) {
         console.log(`Fixing Swift tools version in: ${filePath}`);
         content = content.replace(/swift-tools-version:\s*6\.2/g, 'swift-tools-version: 6.0');
+        changed = true;
+      }
+      if (content.includes('swiftLanguageModes')) {
+        console.log(`Downgrading swiftLanguageModes to v5 in: ${filePath}`);
+        content = content.replace(/swiftLanguageModes:\s*\[\.v6\]/g, 'swiftLanguageModes: [.v5]');
         changed = true;
       }
     }
