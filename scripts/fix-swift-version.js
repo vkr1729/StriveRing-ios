@@ -177,7 +177,7 @@ if (fs.existsSync(nodeModulesPath)) {
             #endif`;
         if (content.includes('hidesSharedBackground')) {
           console.log(`Fixing hidesSharedBackground @available check in: ${filePath}`);
-          content = content.replace(/if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{[\s\S]*?item\.hidesSharedBackground[\s\S]*?item\.sharesBackground[\s\S]*?\}/g, replacement);
+          content = content.replace(/if\s+#available\s*\(\s*iOS\s+26\.0\s*,\s*\*\s*\)\s*\{[\s\S]*?item\.hidesSharedBackground[\s\S]*?item\.sharesBackground[\s\S]*?\}\s*\}/g, replacement);
           changed = true;
         }
       }
