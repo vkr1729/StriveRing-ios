@@ -50,9 +50,10 @@ function withStriveRingWidgets(config) {
         
         // Link to Xcode Project
         const fileRef = project.addFile(path.join(mainTargetName, filename), project.getFirstProject().firstProject.mainGroup);
-        const uuid = project.getFirstTarget().uuid;
-        project.addToPbxBuildFileSection(fileRef);
-        project.addToPbxSourcesBuildPhase(fileRef);
+        if (fileRef) {
+          project.addToPbxBuildFileSection(fileRef);
+          project.addToPbxSourcesBuildPhase(fileRef);
+        }
       }
     });
 
