@@ -198,6 +198,24 @@ if (fs.existsSync(nodeModulesPath)) {
         }
       }
 
+      // Fix visionOS/iOS 26 lineHeight modifier in @expo/ui
+      if (path.basename(filePath) === 'ViewModifierRegistry.swift') {
+        if (content.includes('struct LineHeight:')) {
+          console.log(`Fixing LineHeight modifier in: ${filePath}`);
+          content = content.replace(
+            /struct\s+LineHeight:\s*ViewModifier,\s*Record\s*\{[\s\S]*?func\s+body\([\s\S]*?\}\s*\}\s*\}/g,
+            `struct LineHeight: ViewModifier, Record {
+  @Field var value: CGFloat?
+
+  func body(content: Content) -> some View {
+    content
+  }
+}`
+          );
+          changed = true;
+        }
+      }
+
       // Fix visionOS-only APIs in expo-router
       if (path.basename(filePath) === 'RouterToolbarHostView.swift') {
         const replacement = `#if os(visionOS)
