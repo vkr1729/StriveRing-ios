@@ -9,10 +9,13 @@ export function todayDateString(): string {
 }
 
 export async function loadState(): Promise<AppState | null> {
-  const raw = await AsyncStorage.getItem(STORAGE_KEY);
-  if (raw === null) return null;
-  const parsed = JSON.parse(raw) as AppState;
-  return parsed;
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (raw === null) return null;
+    return JSON.parse(raw) as AppState;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveState(state: AppState): Promise<void> {

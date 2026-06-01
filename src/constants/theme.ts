@@ -1,4 +1,5 @@
 import type { Habit } from '@/types';
+import { Platform } from 'react-native';
 
 export const Colors = {
   background: '#060a10',
@@ -31,7 +32,7 @@ export const Gradients = {
 } as const;
 
 export const Fonts = {
-  mono: 'ui-monospace',
+  mono: Platform.select({ ios: 'Menlo', default: 'monospace' }),
 };
 
 export const Spacing = {

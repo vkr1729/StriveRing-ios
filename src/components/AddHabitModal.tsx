@@ -109,7 +109,7 @@ export function AddHabitModal({
     };
 
     if (Platform.OS === 'web') {
-      if (confirm(`Are you sure you want to delete "${habitToEdit.name}"?`)) {
+      if (typeof globalThis.confirm === 'function' && globalThis.confirm(`Are you sure you want to delete "${habitToEdit.name}"?`)) {
         performDelete();
       }
     } else {

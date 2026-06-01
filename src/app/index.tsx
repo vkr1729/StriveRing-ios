@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Platform, Clipboard, Alert, Pressable, NativeModules } from 'react-native';
+import { StyleSheet, ScrollView, View, Platform, Alert, Pressable, NativeModules } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -40,9 +41,9 @@ export default function HomeScreen() {
     };
     const jsonStr = JSON.stringify(backupState, null, 2);
 
-    Clipboard.setString(jsonStr);
+    Clipboard.setStringAsync(jsonStr);
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
       try {
         const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonStr);
         const downloadAnchor = document.createElement('a');
@@ -76,10 +77,7 @@ export default function HomeScreen() {
   const isPaused = state.activeSession?.isPaused ?? false;
   const isActive = hasActiveSession && !isPaused;
 
-  useTimer(
-    useCallback((action) => dispatch(action), [dispatch]),
-    isActive,
-  );
+  useTimer(dispatch, isActive);
 
   // Swipe gesture handling
   const touchStartX = useRef(0);
