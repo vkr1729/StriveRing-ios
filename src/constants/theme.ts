@@ -45,9 +45,9 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const RING_RADIUS = 100;
+export const RING_RADIUS = 85;
 export const RING_STROKE_WIDTH = 8;
-export const RING_CIRCUMFERENCE = Math.round(2 * Math.PI * RING_RADIUS);
+export const RING_CIRCUMFERENCE = 534;
 export const RING_VIEWBOX = '0 0 240 240';
 export const RING_CENTER = 120;
 
