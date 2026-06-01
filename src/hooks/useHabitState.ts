@@ -4,12 +4,12 @@ import { DEFAULT_HABITS, DEFAULT_DAILY_TARGET } from '@/constants/theme';
 import { loadState, saveState, clearDailyIfNewDay, todayDateString } from '@/utils/storage';
 import { NativeModules, Platform } from 'react-native';
 
-const { StriveRingActivityBridge } = NativeModules;
+const getActivityBridge = () => NativeModules.StriveRingActivityBridge;
 
 const syncWidgetState = (dailyStrain: number, target: number, completedSessions: any[]) => {
-  if (Platform.OS === 'ios' && StriveRingActivityBridge?.syncSharedState) {
+  if (Platform.OS === 'ios' && getActivityBridge()?.syncSharedState) {
     try {
-      StriveRingActivityBridge.syncSharedState(
+      getActivityBridge().syncSharedState(
         Math.round(dailyStrain),
         Math.round(target),
         JSON.stringify(completedSessions)

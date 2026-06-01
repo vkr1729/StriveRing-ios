@@ -17,7 +17,7 @@ import {
   Glass,
   Gradients,
 } from '@/constants/theme';
-import { ringOffset, getColorForPercent, formatScore } from '@/utils/scoring';
+import { getColorForPercent, formatScore } from '@/utils/scoring';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -38,9 +38,12 @@ export function ProgressRing({ score, target, habitName, accentColor }: Progress
     animatedPercent.value = withTiming(percentComplete, { duration: 600 });
   }, [percentComplete, animatedPercent]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: ringOffset(animatedPercent.value),
-  }));
+  const animatedProps = useAnimatedProps(() => {
+    const clamped = Math.max(0, Math.min(1, animatedPercent.value));
+    return {
+      strokeDashoffset: RING_CIRCUMFERENCE - RING_CIRCUMFERENCE * clamped,
+    };
+  });
 
   return (
     <View style={styles.container}>

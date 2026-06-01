@@ -1,6 +1,6 @@
 import { StyleSheet, View, TextInput } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Glass } from '@/constants/theme';
+import { Colors, Glass, Fonts } from '@/constants/theme';
 
 interface GoalSettingCardProps {
   target: number;
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 32,
     fontWeight: '700',
-    fontFamily: 'ui-monospace',
+    fontFamily: Fonts.mono,
     fontVariant: ['tabular-nums'],
     minWidth: 50,
     padding: 0,

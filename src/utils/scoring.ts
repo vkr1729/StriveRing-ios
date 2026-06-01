@@ -17,7 +17,7 @@ export function calculateActiveScore(session: ActiveSession, habit: Habit, now?:
   const rate = Math.max(0, habit.pointsPerHour);
 
   if (habit.minimumHours !== undefined) {
-    return (hours - habit.minimumHours) * rate;
+    return Math.max(0, (hours - habit.minimumHours) * rate);
   }
   return hours * rate;
 }
