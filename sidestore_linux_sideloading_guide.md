@@ -16,7 +16,7 @@ Apple's EAS Build cloud service requires a paid Developer Account ($99/year) to 
 Open your terminal on your computer and run these commands to link your repository and push the code:
 ```bash
 # Navigate to your workspace
-cd /home/kedarnath-reddy-vallaboina/StriveRing-ios
+cd ~/StriveRing-ios
 
 # Link your new GitHub repository
 git remote add origin https://github.com/YOUR_GITHUB_USERNAME/StriveRing-ios.git
@@ -42,11 +42,11 @@ Because AltServer requires a background PC to refresh apps every week, we will u
 
 ### Step 1: Run iLoader
 We have already downloaded the latest Linux `iLoader` AppImage and set it up for you at:
-`[iloader-linux-amd64.AppImage](file:///home/kedarnath-reddy-vallaboina/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage)`
+`~/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage`
 
 To run it, open your terminal and execute:
 ```bash
-cd /home/kedarnath-reddy-vallaboina/.gemini/antigravity-ide/scratch/sideload-setup/
+cd ~/.gemini/antigravity-ide/scratch/sideload-setup/
 ./iloader-linux-amd64.AppImage
 ```
 *Note: This is a GUI utility and requires running within your active Linux desktop session.*

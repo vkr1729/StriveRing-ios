@@ -77,7 +77,7 @@ We have bypassed Apple's $99/year developer fee by combining a **free GitHub Act
 
 ### Quick Setup Blueprint:
 1. **Obtain the IPA**: Get the precompiled **[build/StriveRing.ipa](build/StriveRing.ipa)** directly from this repository, or run the **Build Unsigned iOS IPA** workflow in the **Actions** tab to compile a fresh copy.
-2. **Install SideStore**: Run the pre-configured [iLoader AppImage](file:///home/kedarnath-reddy-vallaboina/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage) GUI on your Linux desktop once to sideload SideStore onto your connected iPhone.
+2. **Install SideStore**: Run the pre-configured `iLoader AppImage` (located at `~/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage`) on your Linux desktop once to sideload SideStore onto your connected iPhone.
 3. **Sideload StriveRing**: Transfer the downloaded `.ipa` to your phone and import it into SideStore wirelessly over WireGuard.
 
 For the exact, comprehensive step-by-step tutorial, open the **[Linux SideStore Sideloading Guide](sidestore_linux_sideloading_guide.md)** inside this repository!
