@@ -1,3 +1,4 @@
+// Note: AsyncStorage is used indirectly here by delegating to storage.ts for persistence.
 import { useReducer, useEffect, useCallback, useRef } from 'react';
 import type { AppState, AppAction, DailyRecord } from '@/types';
 import { DEFAULT_HABITS, DEFAULT_DAILY_TARGET } from '@/constants/theme';
