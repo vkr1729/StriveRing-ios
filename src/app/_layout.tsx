@@ -1,12 +1,91 @@
+import React from 'react';
 import '@/utils/styles';
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Platform, useWindowDimensions, Text, ScrollView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 
-export default function RootLayout() {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={errorStyles.container}>
+          <Text style={errorStyles.title}>Something went wrong at startup</Text>
+          <ScrollView style={errorStyles.scroll}>
+            <Text style={errorStyles.errorText}>
+              {this.state.error ? this.state.error.toString() : 'Unknown Error'}
+            </Text>
+            <Text style={errorStyles.stackText}>
+              {this.state.error?.stack || ''}
+            </Text>
+          </ScrollView>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#060a10',
+    padding: 24,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ff3b30',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  scroll: {
+    backgroundColor: '#0d1117',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1c2128',
+  },
+  errorText: {
+    color: '#f0f3f5',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  stackText: {
+    color: '#6e7681',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: 12,
+  },
+});
+
+function RootLayoutInner() {
   const { width, height } = useWindowDimensions();
   const isLargeScreen = Platform.OS === 'web' && width >= 500;
 
@@ -44,6 +123,14 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background } }} />
       </View>
     </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ErrorBoundary>
+      <RootLayoutInner />
+    </ErrorBoundary>
   );
 }
 

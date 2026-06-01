@@ -125,8 +125,16 @@ export default function HomeScreen() {
     const month = parseInt(parts[1], 10) - 1;
     const day = parseInt(parts[2], 10);
     const parsedDate = new Date(year, month, day);
-    const options: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
-    return parsedDate.toLocaleDateString('en-US', options).toUpperCase();
+
+    // Pure JS date formatting to bypass Hermes toLocaleDateString unimplemented crash on iOS
+    const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    
+    const wday = weekdays[parsedDate.getDay()];
+    const mname = months[parsedDate.getMonth()];
+    const dnum = parsedDate.getDate();
+    
+    return `${wday}, ${mname} ${dnum}`;
   }, [dateOffset, selectedDate]);
 
   const handleTouchStart = (e: any) => {
