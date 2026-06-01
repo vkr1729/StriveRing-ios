@@ -1,4 +1,4 @@
-import '@/global.css';
+import '@/utils/styles';
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
