@@ -6,6 +6,13 @@
 [![iOS Native Widgets](https://img.shields.io/badge/iOS-SwiftUI%20Widgets-00e5a0?style=for-the-badge&logo=apple)](https://developer.apple.com/xcode/)
 [![Dynamic Island](https://img.shields.io/badge/Dynamic%20Island-Live%20Activities-a78bfa?style=for-the-badge&logo=swift)](https://developer.apple.com/design/human-interface-guidelines/live-activities)
 [![Expo Framework](https://img.shields.io/badge/Expo-Managed%20Workflow-08090c?style=for-the-badge&logo=expo)](https://expo.dev)
+[![Download Unsigned IPA](https://img.shields.io/badge/Download-Unsigned%20IPA%20(10.2%20MB)-00e5a0?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/vkr1729/StriveRing-ios/actions)
+
+> [!TIP]
+> ### 📦 Precompiled App Bundle
+> If you want to skip compiling from source, you can download the ready-to-sideload **`StriveRing.ipa`** (10.2 MB):
+> *   **Local Copy**: Located right inside the repository at [build/StriveRing.ipa](build/StriveRing.ipa).
+> *   **Latest CI Builds**: Download the fresh build artifact from the [GitHub Actions Runs](https://github.com/vkr1729/StriveRing-ios/actions).
 
 A modern, ultra-premium wellness tracker designed for athletes and high-performers. StriveRing features a gorgeous glassmorphic interface, a responsive score-tracking biometric ring, native SwiftUI Home Screen Widgets, and Dynamic Island Live Activities that keep your real-time timers and performance metrics accessible at a glance.
 
@@ -69,9 +76,9 @@ StriveRing is built using a modern **hybrid prebuild architecture** that allows 
 We have bypassed Apple's $99/year developer fee by combining a **free GitHub Actions CI/CD workflow** (which builds an unsigned `.ipa` for physical devices) with **SideStore** (which signs and refreshes the app entirely on your phone via a local VPN loopback, meaning you never need a computer after setup!).
 
 ### Quick Setup Blueprint:
-1. **Trigger the GitHub Build**: Go to your repository's **Actions** tab, select **Build Unsigned iOS IPA**, and click **Run workflow**. Download your compiled `StriveRing.ipa` when finished.
+1. **Obtain the IPA**: Get the precompiled **[build/StriveRing.ipa](build/StriveRing.ipa)** directly from this repository, or run the **Build Unsigned iOS IPA** workflow in the **Actions** tab to compile a fresh copy.
 2. **Install SideStore**: Run the pre-configured [iLoader AppImage](file:///home/kedarnath-reddy-vallaboina/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage) GUI on your Linux desktop once to sideload SideStore onto your connected iPhone.
-3. **Sideload StriveRing**: Download the `.ipa` onto your phone and import it into SideStore wirelessly over WireGuard.
+3. **Sideload StriveRing**: Transfer the downloaded `.ipa` to your phone and import it into SideStore wirelessly over WireGuard.
 
 For the exact, comprehensive step-by-step tutorial, open the **[Linux SideStore Sideloading Guide](sidestore_linux_sideloading_guide.md)** inside this repository!
 
