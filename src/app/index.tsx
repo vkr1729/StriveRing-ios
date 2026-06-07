@@ -83,6 +83,7 @@ export default function HomeScreen() {
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const lastSentScoreRef = useRef(-1);
+  const isStoppingRef = useRef(false);
 
   const oldestOffset = useMemo(() => {
     const dates = Object.keys(state.history || {});
@@ -158,17 +159,17 @@ export default function HomeScreen() {
     }
   };
 
-  const liveScore = useMemo(() => {
+  const liveScore = (() => {
     if (isViewingHistory || !state.activeSession) return 0;
     const habit = state.habits.find((h) => h.id === state.activeSession!.habitId);
     if (!habit) return 0;
     return calculateActiveScore(state.activeSession, habit);
-  }, [isViewingHistory, state.activeSession, state.habits]);
+  })();
 
-  const elapsedMs = useMemo(() => {
+  const elapsedMs = (() => {
     if (isViewingHistory || !state.activeSession) return 0;
     return calculateElapsedMs(state.activeSession);
-  }, [isViewingHistory, state.activeSession]);
+  })();
 
   const totalDisplayScore = isViewingHistory ? currentRecord.totalScore : state.dailyRecord.totalScore + liveScore;
 
@@ -231,7 +232,8 @@ export default function HomeScreen() {
   }, [liveScore, state.dailyRecord.totalScore, elapsedMs, persistDispatch]);
 
   const handleStop = useCallback(() => {
-    if (!state.activeSession) return;
+    if (!state.activeSession || isStoppingRef.current) return;
+    isStoppingRef.current = true;
     const habit = state.habits.find((h) => h.id === state.activeSession!.habitId);
     const score = habit ? calculateActiveScore(state.activeSession, habit) : 0;
     persistDispatch({
@@ -241,17 +243,22 @@ export default function HomeScreen() {
       habitName: habit?.name ?? 'Unknown',
     });
     
+    const postStopTotal = todayDateString() !== state.dailyRecord.date
+      ? score
+      : state.dailyRecord.totalScore + score;
+
     if (Platform.OS === 'ios') {
       const { StriveRingActivityBridge } = NativeModules;
       if (StriveRingActivityBridge?.endActivity) {
         StriveRingActivityBridge.endActivity(
           Math.round(score),
-          state.dailyRecord.totalScore + score,
+          postStopTotal,
           0
         );
       }
     }
-  }, [state.activeSession, state.habits, state.dailyRecord.totalScore, persistDispatch]);
+    setTimeout(() => { isStoppingRef.current = false; }, 500);
+  }, [state.activeSession, state.habits, state.dailyRecord.totalScore, state.dailyRecord.date, persistDispatch]);
 
   const handleSimHour = useCallback(() => {
     if (!state.activeSession) return;
@@ -304,6 +311,9 @@ export default function HomeScreen() {
     persistDispatch({ type: 'SET_TARGET', target });
   }, [persistDispatch]);
 
+  const handlePrevDay = useCallback(() => setDateOffset(prev => Math.max(oldestOffset, prev - 1)), [oldestOffset]);
+  const handleNextDay = useCallback(() => setDateOffset(prev => Math.min(0, prev + 1)), []);
+
   if (!state.isLoaded) {
     return (
       <ThemedView style={styles.container}>
@@ -315,9 +325,6 @@ export default function HomeScreen() {
       </ThemedView>
     );
   }
-
-  const handlePrevDay = useCallback(() => setDateOffset(prev => Math.max(oldestOffset, prev - 1)), [oldestOffset]);
-  const handleNextDay = useCallback(() => setDateOffset(prev => Math.min(0, prev + 1)), []);
 
   return (
     <ThemedView
@@ -391,6 +398,7 @@ export default function HomeScreen() {
               isActive={isActive}
               isPaused={isPaused}
               hasActiveSession={hasActiveSession}
+              canStart={!!state.selectedHabitId}
               onPlay={handlePlay}
               onPause={handlePause}
               onResume={handleResume}
@@ -406,7 +414,6 @@ export default function HomeScreen() {
             <HabitGrid
               habits={state.habits}
               selectedHabitId={isViewingHistory ? null : state.selectedHabitId}
-              totalScore={totalDisplayScore}
               onSelect={handleSelectHabit}
               onAdd={() => {
                 setEditingHabit(null);

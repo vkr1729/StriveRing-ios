@@ -11,6 +11,8 @@ interface AnalyticsDashboardProps {
 }
 
 export function AnalyticsDashboard({ visible, onClose, state }: AnalyticsDashboardProps) {
+  if (!visible) return null;
+
   const data = computeAnalytics(state);
 
   return (

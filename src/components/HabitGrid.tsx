@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, Pressable, View } from 'react-native';
+import { StyleSheet, Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Glass } from '@/constants/theme';
@@ -9,7 +9,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 interface HabitGridProps {
   habits: Habit[];
   selectedHabitId: string | null;
-  totalScore: number;
   onSelect: (habitId: string) => void;
   onAdd: () => void;
   onEdit: (habit: Habit) => void;
@@ -105,11 +104,7 @@ export function HabitGrid({
   disabled = false,
 }: HabitGridProps) {
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.scrollContent}
-      style={styles.scroll}
-    >
+    <View style={styles.gridContent}>
       {habits.map((habit) => (
         <HabitCard
           key={habit.id}
@@ -132,15 +127,12 @@ export function HabitGrid({
           Add Activity
         </ThemedText>
       </Pressable>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    maxHeight: 260,
-  },
-  scrollContent: {
+  gridContent: {
     paddingHorizontal: 16,
     gap: 10,
     paddingVertical: 4,

@@ -13,7 +13,6 @@
       "bundleIdentifier": "com.strivering.app",
       "entitlements": {
         "com.apple.security.application-groups": [
-          "group.com.strivering.app",
           "group.com.strivering.app"
         ]
       },

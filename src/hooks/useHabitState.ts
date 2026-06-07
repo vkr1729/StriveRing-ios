@@ -21,64 +21,6 @@ const syncWidgetState = (dailyStrain: number, target: number, completedSessions:
   }
 };
 
-function generateMockHistory(): Record<string, DailyRecord> {
-  const history: Record<string, DailyRecord> = {};
-  
-  const d1 = new Date();
-  d1.setDate(d1.getDate() - 1);
-  const yesterdayStr = `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(d1.getDate()).padStart(2, '0')}`;
-  
-  const d2 = new Date();
-  d2.setDate(d2.getDate() - 2);
-  const twoDaysAgoStr = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')}`;
-  
-  history[yesterdayStr] = {
-    date: yesterdayStr,
-    totalScore: 79,
-    target: 100,
-    completedSessions: [
-      {
-        habitId: 'default-exercise',
-        startTime: Date.now() - 86400000 - 18000000,
-        endTime: Date.now() - 86400000 - 10800000,
-        score: 40,
-        habitName: 'Exercise',
-      },
-      {
-        habitId: 'default-focus',
-        startTime: Date.now() - 86400000 - 36000000,
-        endTime: Date.now() - 86400000 - 28800000,
-        score: 39,
-        habitName: 'Focus Work',
-      }
-    ]
-  };
-
-  history[twoDaysAgoStr] = {
-    date: twoDaysAgoStr,
-    totalScore: 76,
-    target: 100,
-    completedSessions: [
-      {
-        habitId: 'default-sleep',
-        startTime: Date.now() - 172800000 - 28800000,
-        endTime: Date.now() - 172800000,
-        score: 30,
-        habitName: 'Sleep',
-      },
-      {
-        habitId: 'default-focus',
-        startTime: Date.now() - 172800000 - 36000000,
-        endTime: Date.now() - 172800000 - 28800000,
-        score: 46,
-        habitName: 'Focus Work',
-      }
-    ]
-  };
-  
-  return history;
-}
-
 function createDefaultState(): AppState {
   return {
     habits: DEFAULT_HABITS,
@@ -90,7 +32,7 @@ function createDefaultState(): AppState {
       completedSessions: [],
       target: DEFAULT_DAILY_TARGET,
     },
-    history: generateMockHistory(),
+    history: {},
     isLoaded: false,
   };
 }
@@ -99,10 +41,7 @@ function reducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'LOAD_STATE': {
       const today = todayDateString();
-      let history = action.state.history || {};
-      if (Object.keys(history).length === 0) {
-        history = generateMockHistory();
-      }
+      const history = action.state.history || {};
       if (action.state.dailyRecord.date !== today) {
         return {
           ...action.state,
@@ -126,6 +65,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'IMPORT_STATE':
       return {
         ...action.state,
+        activeSession: null,
         history: action.state.history ?? {},
         isLoaded: true,
       };
@@ -171,6 +111,34 @@ function reducer(state: AppState, action: AppAction): AppState {
       };
     case 'STOP_SESSION': {
       if (!state.activeSession) return state;
+      const today = todayDateString();
+      const completedSession = {
+        habitId: state.activeSession.habitId,
+        startTime: state.activeSession.startTime,
+        endTime: action.endTime,
+        score: action.score,
+        habitName: action.habitName,
+      };
+
+      if (state.dailyRecord.date !== today) {
+        const updatedHistory = {
+          ...state.history,
+          [state.dailyRecord.date]: state.dailyRecord,
+        };
+        return {
+          ...state,
+          activeSession: null,
+          selectedHabitId: null,
+          history: updatedHistory,
+          dailyRecord: {
+            date: today,
+            totalScore: action.score,
+            completedSessions: [completedSession],
+            target: state.dailyRecord.target,
+          },
+        };
+      }
+
       return {
         ...state,
         activeSession: null,
@@ -180,13 +148,7 @@ function reducer(state: AppState, action: AppAction): AppState {
           totalScore: state.dailyRecord.totalScore + action.score,
           completedSessions: [
             ...state.dailyRecord.completedSessions,
-            {
-              habitId: state.activeSession.habitId,
-              startTime: state.activeSession.startTime,
-              endTime: action.endTime,
-              score: action.score,
-              habitName: action.habitName,
-            },
+            completedSession,
           ],
         },
       };
