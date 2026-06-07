@@ -19,9 +19,9 @@ export interface AnalyticsData {
   habits: HabitStat[];
 }
 
-function getDateStringForOffset(offsetDays: number): string {
+function getDateStringForDaysAgo(daysAgo: number): string {
   const d = new Date();
-  d.setDate(d.getDate() - offsetDays);
+  d.setDate(d.getDate() - daysAgo);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
@@ -57,7 +57,7 @@ export function computeAnalytics(state: AppState): AnalyticsData {
 
   // Calculate values for last 30 days
   for (let i = 0; i < 30; i++) {
-    const dateStr = getDateStringForOffset(i);
+    const dateStr = getDateStringForDaysAgo(i);
     let record: DailyRecord;
 
     if (i === 0) {

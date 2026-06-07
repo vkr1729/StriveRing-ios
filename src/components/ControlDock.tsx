@@ -10,6 +10,7 @@ interface ControlDockProps {
   isActive: boolean;
   isPaused: boolean;
   hasActiveSession: boolean;
+  canStart: boolean;
   onPlay: () => void;
   onPause: () => void;
   onResume: () => void;
@@ -59,6 +60,7 @@ export function ControlDock({
   isActive,
   isPaused,
   hasActiveSession,
+  canStart,
   onPlay,
   onPause,
   onResume,
@@ -69,7 +71,7 @@ export function ControlDock({
     <View style={styles.container}>
       <View style={styles.glassDock}>
         {!hasActiveSession && (
-          <PillButton onPress={onPlay} label="START" variant="primary" />
+          <PillButton onPress={canStart ? onPlay : () => {}} label="START" variant={canStart ? "primary" : "subtle"} />
         )}
         {hasActiveSession && !isPaused && (
           <View style={styles.row}>

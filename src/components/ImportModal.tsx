@@ -43,6 +43,17 @@ export function ImportModal({ visible, onClose, onImport }: ImportModalProps) {
     if (!parsed.history || typeof parsed.history !== 'object') {
       throw new Error('Import data is missing a valid "history" object.');
     }
+    if (!parsed.habits.every(
+      (h: any) => typeof h.id === 'string' && typeof h.name === 'string' && typeof h.pointsPerHour === 'number'
+    )) {
+      throw new Error('Habits list contains invalid entries.');
+    }
+    if (typeof parsed.dailyRecord.totalScore !== 'number' || typeof parsed.dailyRecord.date !== 'string' || typeof parsed.dailyRecord.target !== 'number') {
+      throw new Error('dailyRecord has invalid fields.');
+    }
+    if (!Array.isArray(parsed.dailyRecord.completedSessions)) {
+      throw new Error('dailyRecord is missing a valid "completedSessions" array.');
+    }
 
     // Schema checks passed
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
