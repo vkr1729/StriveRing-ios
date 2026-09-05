@@ -12,6 +12,7 @@ final class SessionManager {
     var isPaused: Bool = false
     var sessionNote: String?
     var isShowingRunawayPrompt: Bool = false
+    var liveElapsedSeconds: TimeInterval = 0
 
     private var timer: Timer?
 
@@ -30,6 +31,7 @@ final class SessionManager {
     }
 
     var elapsedSeconds: TimeInterval {
+        _ = liveElapsedSeconds
         guard let startTime, activeCategory != nil else { return accumulatedSeconds }
         if isPaused {
             return accumulatedSeconds
@@ -39,6 +41,7 @@ final class SessionManager {
     }
 
     var formattedElapsed: String {
+        _ = liveElapsedSeconds
         let total = Int(elapsedSeconds)
         let hours = total / 3600
         let minutes = (total % 3600) / 60
@@ -64,6 +67,7 @@ final class SessionManager {
         accumulatedSeconds += max(0, Date.now.timeIntervalSince(startTime))
         self.startTime = nil
         self.isPaused = true
+        self.liveElapsedSeconds = accumulatedSeconds
 
         persistState()
         stopTimer()
@@ -73,6 +77,7 @@ final class SessionManager {
         guard isPaused else { return }
         self.startTime = .now
         self.isPaused = false
+        self.liveElapsedSeconds = accumulatedSeconds
 
         persistState()
         startTimer()
@@ -128,10 +133,12 @@ final class SessionManager {
 
     private func startTimer() {
         stopTimer()
+        self.liveElapsedSeconds = self.elapsedSeconds
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 if self.activeCategory != nil && !self.isPaused {
+                    self.liveElapsedSeconds = self.elapsedSeconds
                     self.checkRunawaySession()
                 }
             }
@@ -177,7 +184,10 @@ final class SessionManager {
         let startTimestamp = defaults.double(forKey: userDefaultsStartTimeKey)
         if startTimestamp > 0 && !isPaused {
             self.startTime = Date(timeIntervalSince1970: startTimestamp)
+            self.liveElapsedSeconds = self.elapsedSeconds
             startTimer()
+        } else {
+            self.liveElapsedSeconds = self.accumulatedSeconds
         }
 
         checkRunawaySession()
@@ -191,6 +201,7 @@ final class SessionManager {
         self.isPaused = false
         self.sessionNote = nil
         self.isShowingRunawayPrompt = false
+        self.liveElapsedSeconds = 0
         persistState()
     }
 }

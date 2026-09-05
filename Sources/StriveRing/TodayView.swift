@@ -132,7 +132,7 @@ struct TodayView: View {
                         )
                     }
                     .padding(.top, 4)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 100)
                 }
                 .padding(.horizontal, 18)
             }
@@ -145,7 +145,7 @@ struct TodayView: View {
                     self.undoSession = nil
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 10)
+                .padding(.bottom, 75)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
@@ -344,9 +344,10 @@ private struct PillarCard: View {
 
             HStack {
                 Text(customSubtitle ?? score.statusNote)
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(Color.srMutedInk)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 Spacer()
 

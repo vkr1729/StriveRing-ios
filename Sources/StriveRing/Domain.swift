@@ -215,7 +215,7 @@ enum AlignmentEngine {
                 points: bonusPts,
                 maxPoints: 15.0,
                 isCompleted: focusDuration >= (2.0 * 3600),
-                statusNote: "Weekend focus optional · +\(Int(bonusPts)) bonus"
+                statusNote: "Optional on Weekends"
             )
         } else {
             // Weekday: 8h target, 6h hard gate (max 40 pts)
@@ -316,7 +316,7 @@ enum AlignmentEngine {
             points: familyPts,
             maxPoints: familyMaxPts,
             isCompleted: familyDuration >= (familyTarget * 0.75),
-            statusNote: isWeekend ? "Weekend Family Priority" : "Evening Presence"
+            statusNote: isWeekend ? "Family Priority" : "Evening Presence"
         )
 
         // 5. Drift / Social Media Leak Penalty
@@ -349,11 +349,14 @@ enum AlignmentEngine {
             statusNote: driftNote
         )
 
-        // 6. Routine Upkeep Gap Calculation
+        // 6. Routine Upkeep Gap Calculation (relative to elapsed waking time so far today)
         let wakingLoggedDuration = focusDuration + workoutDuration + familyDuration + driftDuration
-        let wakingSeconds = max(0, (24.0 * 3600) - sleepDuration)
-        let unloggedGap = max(0, wakingSeconds - wakingLoggedDuration)
-        let isUnloggedGapHigh = unloggedGap > unloggedGapThreshold
+        let isToday = calendar.isDateInToday(date)
+        let referenceDate = isToday ? Date.now : (calendar.date(bySettingHour: 23, minute: 59, second: 59, of: date) ?? date)
+        let elapsedDaySeconds = max(0, referenceDate.timeIntervalSince(calendar.startOfDay(for: date)))
+        let wakingSecondsElapsed = max(0, elapsedDaySeconds - sleepDuration)
+        let unloggedGap = max(0, wakingSecondsElapsed - wakingLoggedDuration)
+        let isUnloggedGapHigh = wakingSecondsElapsed >= unloggedGapThreshold && unloggedGap >= unloggedGapThreshold
 
         // Total Alignment Score
         let rawScore = focusScore.points + workoutScore.points + sleepScore.points + familyScore.points - Double(driftPenalty)
