@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 @Observable
 final class SessionManager {
     static let shared = SessionManager()
@@ -128,10 +129,11 @@ final class SessionManager {
     private func startTimer() {
         stopTimer()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            // Force state update for SwiftUI observers
-            if self.activeCategory != nil && !self.isPaused {
-                self.checkRunawaySession()
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                if self.activeCategory != nil && !self.isPaused {
+                    self.checkRunawaySession()
+                }
             }
         }
     }
