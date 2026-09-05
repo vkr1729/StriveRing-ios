@@ -1,0 +1,63 @@
+name: StriveRing
+options:
+  bundleIdPrefix: com.kedar
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: targeted
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: false
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+targets:
+  StriveRing:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/StriveRing
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kedar.strivering
+        PRODUCT_NAME: StriveRing
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_KEY_CFBundleDisplayName: StriveRing
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets:
+        - StriveRingTests
+        - StriveRingUITests
+  StriveRingTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/StriveRingTests
+    dependencies:
+      - target: StriveRing
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kedar.strivering.tests
+        GENERATE_INFOPLIST_FILE: true
+  StriveRingUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/StriveRingUITests
+    dependencies:
+      - target: StriveRing
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.kedar.strivering.uitests
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: StriveRing
