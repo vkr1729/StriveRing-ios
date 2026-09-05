@@ -1,6 +1,7 @@
 import XCTest
 @testable import StriveRing
 
+@MainActor
 final class StriveRingTests: XCTestCase {
 
     // Fixed Wednesday for weekday testing
