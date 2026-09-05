@@ -1,102 +1,37 @@
-<img src="screenshots/strivering_app_icon.png" width="128" align="right" alt="StriveRing Premium Logo" style="border-radius: 28px; box-shadow: 0px 8px 24px rgba(0, 229, 160, 0.2);"/>
+# StriveRing
 
-# StriveRing ⚡️
-### Premium Cybernetic Wellness & Habit Tracker for iOS
+StriveRing is a private, native offline-first iOS 26 application for Kedar. It turns the reality of the 24-hour day (1,440 minutes) into an honest **Daily Alignment Score (0–100)** and a **Clear Glass Segmented Rhythm Ring**.
 
-[![iOS Native Widgets](https://img.shields.io/badge/iOS-SwiftUI%20Widgets-00e5a0?style=for-the-badge&logo=apple)](https://developer.apple.com/xcode/)
-[![Dynamic Island](https://img.shields.io/badge/Dynamic%20Island-Live%20Activities-a78bfa?style=for-the-badge&logo=swift)](https://developer.apple.com/design/human-interface-guidelines/live-activities)
-[![Expo Framework](https://img.shields.io/badge/Expo-Managed%20Workflow-08090c?style=for-the-badge&logo=expo)](https://expo.dev)
-[![Download Unsigned IPA](https://img.shields.io/badge/Download-Unsigned%20IPA%20(10.2%20MB)-00e5a0?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/vkr1729/StriveRing-ios/actions)
+It is designed for unyielding personal accountability: locking in 8 hours of deep focus with a mandatory 6-hour minimum gate, reviving 5–6 weekly workouts with full credit for 40-minute sessions, safeguarding uninterrupted evening presence with his growing son, and catching mindless social media drift before it consumes the day.
 
-> [!TIP]
-> ### 📦 Precompiled App Bundle
-> If you want to skip compiling from source, you can download the ready-to-sideload **`StriveRing.ipa`** (10.2 MB):
-> *   **Local Copy**: Located right inside the repository at [build/StriveRing.ipa](build/StriveRing.ipa).
-> *   **Latest CI Builds**: Download the fresh build artifact from the [GitHub Actions Runs](https://github.com/vkr1729/StriveRing-ios/actions).
+## What is implemented
 
-A modern, ultra-premium wellness tracker designed for athletes and high-performers. StriveRing features a gorgeous glassmorphic interface, a responsive score-tracking biometric ring, native SwiftUI Home Screen Widgets, and Dynamic Island Live Activities that keep your real-time timers and performance metrics accessible at a glance.
+- **100% Native SwiftUI & SwiftData**: Zero npm/JavaScript dependencies, instant 120Hz micro-interactions, and native Clear Glass materials.
+- **Clear Glass Segmented Rhythm Ring**: 4 concentric progress tracks (Sleep, Focus Work, Workout, Family Time) with tabular `.monospacedDigit()` alignment score.
+- **Focus Gate Accountability**: 8.0h daily weekday target with a mandatory **≥6.0h lock-in milestone** (+30 pts up to 6h, max 40 pts).
+- **Workout Rebound (5–6x / Week)**: Flexible qualifying threshold (**≥ 35–40 mins**) awarding full **+20 points** and tracking weekly consistency (`Day X of 6`).
+- **Sacred Family Presence**: 1.5–2.5h dedicated screen-free evening presence (dinner, play, bedtime). Expands to 4.0h on weekends.
+- **Drift & Social Media Audit**: 30-minute free grace buffer (0 penalty); excess video/social scrolling deducts **-5 pts per 30m**; unlogged waking gaps > 5.0h trigger a gentle upkeep reminder.
+- **Active Floating Stopwatch Dock**: Running session timer with zero clock drift across backgrounding, plus runaway session safeguards.
+- **24-Hour Timeline & Weekly Trends**: Chronological daily stream, consistency streaks, focus compliance, and data export.
+- **GitHub Actions CI/CD**: Unsigned IPA workflow producing ready-to-sideload `.ipa` for **SideStore / LiveContainer**.
 
----
+## Build & Sideloading
 
-## 📸 Interface & Testing Highlights
+The repository uses [XcodeGen](https://github.com/yonaskolb/XcodeGen) so generated Xcode project files do not need to be committed.
 
-### Native App Experience
-<p align="center">
-  <img src="screenshots/test_step_1_focus_30.png" width="30%" alt="Focus session" style="border-radius: 12px; margin-right: 2%;"/>
-  <img src="screenshots/test_step_2_add_modal.png" width="30%" alt="Edit habits" style="border-radius: 12px; margin-right: 2%;"/>
-  <img src="screenshots/test_step_5_analytics_dashboard.png" width="30%" alt="Analytics dashboard" style="border-radius: 12px;"/>
-</p>
-
-### Home Screen Widgets & Dynamic Island
-<p align="center">
-  <img src="screenshots/strivering_widgets_render.png" width="90%" alt="Widgets & Live Activities" style="border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);"/>
-</p>
-
----
-
-## ✨ Features
-
-- 🌀 **Responsive Biometric Ring**: Markerless biometric ring that beautifully transitions from glowing Crimson ➔ Amber ➔ Neon Teal as you accumulate daily strain score.
-- 🎛️ **Premium Control Dock**: Glassmorphic, frosted-glass control overlay featuring haptic response triggers to play, pause, or simulated-fast-forward (`+1 hr`) background stopwatch sessions.
-- 📱 **SwiftUI Home Screen Widgets**: Small & Medium widgets reflecting overall daily strain score and active target percentages using high-performance user default container syncing.
-- 🏝️ **Dynamic Island & Live Activities**: Monospaced system timer updating seamlessly within the lock screen and Dynamic Island (Compact & Expanded layouts) via standard Apple iOS ActivityKit.
-- 📊 **Wellness Analytics & Historical View**: Minimalist weekly calendar with read-only swipe navigation to inspect past completed strains.
-- 🔒 **Privacy-First Storage**: Secure local-first persistence driven by optimized AsyncStorage middleware.
-
----
-
-## 🏛️ System Architecture
-
-StriveRing is built using a modern **hybrid prebuild architecture** that allows React Native's state engine to communicate with iOS's native SwiftUI targets without maintaining bloated Xcode folders in the main repository:
-
-```
-┌─────────────────────────────────┐
-│     React Native State Engine   │
-└────────────────┬────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────┐     Native Module
-│   Shared App Group Defaults     │ ───────────────┐
-└────────────────┬────────────────┘                │
-                 │                                 ▼
-                 ▼                        ┌─────────────────────────────────┐
-┌─────────────────────────────────┐       │   ActivityKit SwiftUI Bridge    │
-│     SwiftUI Home Screen Widget  │       └────────────────┬────────────────┘
-└─────────────────────────────────┘                        │
-                                                           ▼
-                                          ┌─────────────────────────────────┐
-                                          │   Dynamic Island Live Activity  │
-                                          └─────────────────────────────────┘
-```
-
----
-
-## 🚀 100% Free PC-Free Sideloading (No Developer Account Needed)
-
-We have bypassed Apple's $99/year developer fee by combining a **free GitHub Actions CI/CD workflow** (which builds an unsigned `.ipa` for physical devices) with **SideStore** (which signs and refreshes the app entirely on your phone via a local VPN loopback, meaning you never need a computer after setup!).
-
-### Quick Setup Blueprint:
-1. **Obtain the IPA**: Get the precompiled **[build/StriveRing.ipa](build/StriveRing.ipa)** directly from this repository, or run the **Build Unsigned iOS IPA** workflow in the **Actions** tab to compile a fresh copy.
-2. **Install SideStore**: Run the pre-configured `iLoader AppImage` (located at `~/.gemini/antigravity-ide/scratch/sideload-setup/iloader-linux-amd64.AppImage`) on your Linux desktop once to sideload SideStore onto your connected iPhone.
-3. **Sideload StriveRing**: Transfer the downloaded `.ipa` to your phone and import it into SideStore wirelessly over WireGuard.
-
-For the exact, comprehensive step-by-step tutorial, open the **[Linux SideStore Sideloading Guide](sidestore_linux_sideloading_guide.md)** inside this repository!
-
----
-
-## 💻 Local Development
-
-### 1. Install dependencies
 ```bash
-npm install
+xcodegen generate
+open StriveRing.xcodeproj
 ```
 
-### 2. Start development server
-```bash
-npx expo start
-```
+Target: iOS 26+, iPhone only. Light-mode first.
+On Ubuntu Linux, push to GitHub and download the `StriveRing-unsigned-ipa` artifact from the **Build StriveRing iOS** workflow run, then import into **SideStore** or **LiveContainer**.
 
-### 3. Generate native iOS project folders
-```bash
-npx expo prebuild --platform ios
-```
+## Sources of truth
+
+- `PROJECT.md` — project blueprint, scoring equations, and system architecture.
+- `design-system/strivering/MASTER.md` — selected Clear Glass tokens and rules.
+- `DESIGN_DECISION.md` — comparison of 5 visual directions and why Clear Glass Signature won.
+- `UAT.md` — automated acceptance journeys on iPhone 17 (iOS 26.5).
+- `mockups/strivering-mockups.html` — interactive visual board with real-time day simulation scrubber.

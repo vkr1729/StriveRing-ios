@@ -1,64 +1,77 @@
-name: Build Unsigned iOS IPA
+name: Build StriveRing iOS
 
 on:
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    name: Build Unsigned IPA
-    runs-on: macos-15
+  test-and-build:
+    runs-on: macos-26
+    timeout-minutes: 25
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Check out source
+        uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
+      - name: Select Xcode 26.6
+        run: sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install XcodeGen
+        run: brew install xcodegen
 
-      - name: Setup CocoaPods cache
-        uses: actions/cache@v4
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
+      - name: Generate Xcode project
+        run: xcodegen generate
 
-      - name: Run Expo Prebuild
-        run: npx expo prebuild --platform ios --no-install
-
-      - name: Install CocoaPods
+      - name: Run unit and simulator UAT
         run: |
-          cd ios
-          pod install
-          cd ..
+          set -o pipefail
+          xcodebuild test \
+            -project StriveRing.xcodeproj \
+            -scheme StriveRing \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' \
+            -derivedDataPath build/TestDerivedData \
+            -resultBundlePath build/StriveRing-UAT.xcresult \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify
 
-      - name: Build Unsigned App Archive
+      - name: Upload simulator UAT evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: StriveRing-simulator-UAT
+          path: build/StriveRing-UAT.xcresult
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Build unsigned device app
         run: |
-          xcodebuild -workspace ios/StriveRing.xcworkspace \
-                     -scheme StriveRing \
-                     -configuration Release \
-                     -sdk iphoneos \
-                     CODE_SIGNING_ALLOWED=NO \
-                     CODE_SIGNING_REQUIRED=NO \
-                     CODE_SIGN_IDENTITY="" \
-                     clean archive \
-                     -archivePath build/StriveRing.xcarchive
+          set -o pipefail
+          xcodebuild build \
+            -project StriveRing.xcodeproj \
+            -scheme StriveRing \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            | xcbeautify
 
-      - name: Package Unsigned IPA
+      - name: Package unsigned IPA
         run: |
           mkdir -p build/Payload
-          cp -r build/StriveRing.xcarchive/Products/Applications/StriveRing.app build/Payload/
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/StriveRing.app build/Payload/
           cd build
-          zip -r StriveRing.ipa Payload
+          zip -qry StriveRing-unsigned.ipa Payload
 
-      - name: Upload IPA Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v7
         with:
           name: StriveRing-unsigned-ipa
-          path: build/StriveRing.ipa
-          retention-days: 7
+          path: build/StriveRing-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
