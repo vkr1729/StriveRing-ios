@@ -727,11 +727,11 @@
     // Day in the Life Simulator Engine
     const simSteps = [
       { time: '07:00 AM', score: 25, status: 'Morning Wakeup', sleep: 7.5, focus: 0, workout: 0, family: 0, drift: 0, note: '7.5h Sleep logged (+25 pts). Off to a strong start.' },
-      { time: '08:30 AM', score: 45, status: 'Workout Done', sleep: 7.5, focus: 0, workout: 1.0, family: 0, drift: 0, note: '60m Heavy Pull (+20 pts). Day 5 of 6 workouts locked in!' },
-      { time: '01:00 PM', score: 65, status: 'Morning Sprint', sleep: 7.5, focus: 4.0, workout: 1.0, family: 0, drift: 0, note: '4.0h Deep Work logged (+20 pts). Approaching 6h lock-in gate.' },
-      { time: '01:45 PM', score: 60, status: '⚠ Drift Caught', sleep: 7.5, focus: 4.0, workout: 1.0, family: 0, drift: 45, note: '45m YouTube drift (-5 pts penalty). Catches the leak early.' },
-      { time: '05:45 PM', score: 79, status: '★ 6h Gate Passed', sleep: 7.5, focus: 7.75, workout: 1.0, family: 0, drift: 45, note: '7h 45m Focus completed (+39 pts). Hard gate locked!' },
-      { time: '08:00 PM', score: 94, status: 'Family Complete', sleep: 7.5, focus: 7.75, workout: 1.0, family: 2.0, drift: 45, note: '2h Quality evening with son (+15 pts). Day in full alignment!' }
+      { time: '08:30 AM', score: 45, status: 'Workout Done', sleep: 7.5, focus: 0, workout: 0.67, family: 0, drift: 0, note: '40m Focused Workout (+20 pts). Showing up beats duration — Day 5 of 6 locked in!' },
+      { time: '01:00 PM', score: 65, status: 'Morning Sprint', sleep: 7.5, focus: 4.0, workout: 0.67, family: 0, drift: 0, note: '4.0h Deep Work logged (+20 pts). 2h away from 6h lock-in gate.' },
+      { time: '01:45 PM', score: 60, status: '⚠ Drift Caught', sleep: 7.5, focus: 4.0, workout: 0.67, family: 0, drift: 45, note: '45m YouTube drift: first 30m free buffer, 15m excess triggers -5 pts penalty.' },
+      { time: '05:45 PM', score: 79, status: '★ 6h Gate Passed', sleep: 7.5, focus: 7.75, workout: 0.67, family: 0, drift: 45, note: '7h 45m Focus completed (+39 pts). Hard gate locked!' },
+      { time: '08:00 PM', score: 94, status: 'Family Complete', sleep: 7.5, focus: 7.75, workout: 0.67, family: 2.0, drift: 45, note: '2h Quality evening with son (+15 pts). Day in full alignment!' }
     ];
 
     function applySimStep(index) {

@@ -26,10 +26,11 @@ Every day consists of exactly 1,440 minutes. The **Daily Alignment Score (0–10
 | Pillar | Daily Target | Max Pts | Weight & Behavior Rules |
 | :--- | :---: | :---: | :--- |
 | **Focus Work** | **8.0 hours** | **40 pts** | **The Hard Gate:** Requires locking in at least **6.0 hours** to earn primary credit (+30 pts). Hours 6.0 to 8.0 earn +5 pts/hr up to 40 pts. If < 6.0h on a weekday, an alert warns of an unfulfilled gate. Capped at 8.5h to prevent burnout and protect family time. |
-| **Workout** | **5–6x / week** | **20 pts** | **The Turnaround Nudge:** Rebounding from 2/wk to 5–6/wk (45–60 mins/session). Logging a completed workout immediately locks in the full **+20 points** for the day. Tracks weekly consistency (`Day X of 6`). |
+| **Workout** | **5–6x / week** | **20 pts** | **The Turnaround Nudge:** Rebounding from 2/wk to 5–6/wk. **Flexible threshold:** Any focused session **≥ 35–40 mins** qualifies for the full **+20 points** and advances the weekly consistency badge (`Day X of 6`). Consistency of showing up beats excessive duration. |
 | **Sleep** | **7.5–8.5 hours** | **25 pts** | **The Foundation:** 7.5–8.5h earns the full +25 pts. 6.0–7.0h earns +15 pts. < 6.0h drops to +5 pts. |
 | **Family & Kid Time** | **1.5–2.5 hours** | **15 pts** | **The Sacred Evening Window:** Dedicated screen-free presence with kid (playtime, dinner, bedtime). Earns 7.5 pts/hr up to 15 pts. |
-| **Drift / Distraction** | **0 mins** | **-5 pts / 30m** | **The Leak Audit:** Active tracking for YouTube, Instagram, and mindless browsing. Each 30 minutes deducts -5 points from daily alignment. Unallocated waking hours are exposed as open drift. |
+| **Daily Upkeep (Bath, Meals, Routine)** | **~3.5–4.5 hours** | **Neutral** | **Expected Life Rhythm:** Routine activities (bathing, meals, transit, chores) are expected and unpenalized. **Trend anomaly alert:** If unlogged waking time exceeds **> 5.0 hours**, the app triggers a gentle reminder: *"Unlogged gap is high today (5.2h) — did you forget to log a focus sprint or workout?"* |
+| **Drift / Distraction (Active Log)** | **≤ 30 mins** | **Tiered Penalty** | **30-Min Grace Buffer:** 0 to 30 mins of social media or YouTube is allowed as normal decompression (**0 pts penalty**). Only leaks beyond 30 mins are penalized: **-5 pts for 31–60m**, **-10 pts for 61–90m**, and **-20 pts max cap** for >90m. |
 | **Total Daily** | **1,440 mins** | **100 pts** | **A 90+ score represents an extraordinary day of execution and presence.** |
 
 ---
