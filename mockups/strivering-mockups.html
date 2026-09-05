@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>StriveRing — Five Visual Directions</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --canvas: #F2F5F8;
+      --surface: rgba(255,255,255,0.92);
+      --surface-2: rgba(242,245,248,0.85);
+      --surface-card: #FFFFFF;
+      --ink: #111317;
+      --muted: #646B74;
+      --line: rgba(90,105,120,0.16);
+      --brand: #246A5A;
+      --brand-deep: #1F4145;
+      --brand-soft: #DFEEE9;
+      --focus-color: #0D9488;
+      --focus-soft: #E0F2F1;
+      --sleep-color: #4F46E5;
+      --sleep-soft: #EEF2FF;
+      --workout-color: #0284C7;
+      --workout-soft: #E0F2FE;
+      --family-color: #D97706;
+      --family-soft: #FEF3C7;
+      --drift-color: #E11D48;
+      --drift-soft: #FFE4E6;
+      --shadow: 0 16px 40px rgba(27,39,52,0.10);
+      --radius: 28px;
+      --card-radius: 20px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+    /* Direction A: Precision Chrono */
+    body.a {
+      --canvas: #EEF2F5; --surface: #FFFFFF; --surface-2: #E6ECF1; --surface-card: #FFFFFF;
+      --ink: #0F172A; --muted: #64748B; --line: #CBD5E1; --brand: #1E293B; --brand-deep: #0F172A;
+      --brand-soft: #E2E8F0; --focus-color: #059669; --sleep-color: #3B82F6; --workout-color: #0284C7;
+      --family-color: #D97706; --drift-color: #DC2626; --radius: 18px; --card-radius: 14px;
+    }
+
+    /* Direction B: Living Rhythm (Biophilic / Sage) */
+    body.b {
+      --canvas: #EDF3ED; --surface: #FAFCFA; --surface-2: #E2ECE2; --surface-card: #FFFFFF;
+      --ink: #19271E; --muted: #5B6D60; --line: #CDDACF; --brand: #2E5C38; --brand-deep: #1E3F26;
+      --brand-soft: #DFECDF; --focus-color: #2E7D32; --sleep-color: #5C6BC0; --workout-color: #00897B;
+      --family-color: #C07020; --drift-color: #C62828; --radius: 30px; --card-radius: 24px;
+    }
+
+    /* Direction C: Nordic Clarity (Data-Dense Alpine) */
+    body.c {
+      --canvas: #EAF0F6; --surface: #FCFDFF; --surface-2: #E0E9F2; --surface-card: #FFFFFF;
+      --ink: #0A192F; --muted: #506680; --line: #C5D4E3; --brand: #0284C7; --brand-deep: #0369A1;
+      --brand-soft: #E0F2FE; --focus-color: #0284C7; --sleep-color: #6366F1; --workout-color: #0D9488;
+      --family-color: #EAB308; --drift-color: #F43F5E; --radius: 12px; --card-radius: 10px;
+    }
+
+    /* Direction D: Clear Glass Signature (Span Twin - Selected Ideal) */
+    body.d {
+      --canvas: #F2F5F8; --surface: rgba(255,255,255,0.92); --surface-2: rgba(242,245,248,0.85);
+      --surface-card: #FFFFFF; --ink: #111317; --muted: #646B74; --line: rgba(90,105,120,0.16);
+      --brand: #246A5A; --brand-deep: #1F4145; --brand-soft: #DFEEE9; --focus-color: #00876C;
+      --sleep-color: #4A55A2; --workout-color: #0284C7; --family-color: #D97706; --drift-color: #E11D48;
+      --radius: 28px; --card-radius: 20px; --shadow: 0 18px 44px rgba(27,39,52,0.12);
+    }
+
+    /* Direction E: High Contrast Obsidian / Minimal */
+    body.e {
+      --canvas: #F4F4F5; --surface: #FFFFFF; --surface-2: #E4E4E7; --surface-card: #FFFFFF;
+      --ink: #09090B; --muted: #71717A; --line: #E4E4E7; --brand: #18181B; --brand-deep: #09090B;
+      --brand-soft: #F4F4F5; --focus-color: #10B981; --sleep-color: #6366F1; --workout-color: #06B6D4;
+      --family-color: #F59E0B; --drift-color: #EF4444; --radius: 22px; --card-radius: 16px;
+    }
+
+    .board { width: 2340px; min-height: 1680px; padding: 50px 60px 70px; margin: 0 auto; }
+    .board-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; padding: 0 10px; }
+    .eyebrow { font-size: 16px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); margin-bottom: 6px; }
+    h1 { margin: 0 0 8px; font-size: 44px; font-weight: 800; letter-spacing: -0.04em; }
+    .descriptor { margin: 0; color: var(--muted); font-size: 18px; max-width: 900px; line-height: 1.4; }
+    .palette { display: flex; gap: 12px; align-items: center; }
+    .swatch { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #FFF; box-shadow: 0 3px 10px rgba(0,0,0,0.14); }
+
+    .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 48px; }
+    .screen-wrap { display: flex; gap: 18px; align-items: flex-start; }
+    .screen-label { width: 140px; padding-top: 20px; flex-shrink: 0; }
+    .screen-number { font-size: 13px; font-weight: 800; color: var(--brand); letter-spacing: 0.1em; }
+    .screen-name { font-size: 19px; font-weight: 750; margin: 6px 0; line-height: 1.2; }
+    .screen-note { font-size: 12px; line-height: 1.45; color: var(--muted); }
+
+    .phone {
+      width: 393px; height: 852px; border-radius: 54px; padding: 11px; background: #0E1114;
+      box-shadow: 0 26px 60px rgba(15,23,32,0.25); position: relative; flex-shrink: 0;
+    }
+    .phone::before {
+      content: ""; position: absolute; width: 120px; height: 32px; border-radius: 20px;
+      background: #000; left: 50%; top: 18px; transform: translateX(-50%); z-index: 20;
+    }
+    .display {
+      height: 100%; overflow: hidden; border-radius: 43px; background: var(--canvas);
+      position: relative; display: flex; flex-direction: column;
+    }
+
+    .status-bar {
+      height: 48px; padding: 14px 26px 0; display: flex; justify-content: space-between;
+      align-items: center; font-size: 13px; font-weight: 700; z-index: 10;
+    }
+    .status-icons { display: flex; gap: 5px; align-items: center; }
+    .sig { width: 13px; height: 10px; border-left: 2px solid; border-bottom: 2px solid; transform: skewX(-15deg); opacity: 0.9; }
+    .battery { width: 20px; height: 10px; border: 1.5px solid; border-radius: 3px; position: relative; }
+    .battery::after { content: ""; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: currentColor; border-radius: 0 1px 1px 0; }
+    .battery-fill { position: absolute; left: 2px; top: 2px; width: 12px; height: 4px; background: currentColor; }
+
+    .screen-content {
+      flex: 1; padding: 10px 18px 84px; overflow: hidden; position: relative; display: flex; flex-direction: column;
+    }
+
+    .top-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+    .greeting { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+    .date-badge {
+      font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+    }
+
+    /* Clear Glass Ring Hero */
+    .ring-hero {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px 14px; box-shadow: var(--shadow); position: relative; margin-bottom: 14px;
+      display: flex; flex-direction: column; align-items: center; backdrop-filter: blur(20px);
+    }
+    .ring-svg-wrap { width: 180px; height: 180px; position: relative; margin: 4px 0 10px; }
+    .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring-center {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+    }
+    .ring-score { font-size: 42px; font-weight: 850; letter-spacing: -0.05em; line-height: 0.95; font-variant-numeric: tabular-nums; }
+    .ring-sub { font-size: 10px; font-weight: 750; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .ring-status-pill {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 750;
+      padding: 4px 10px; border-radius: 10px; background: var(--brand-soft); color: var(--brand);
+      margin-top: 6px;
+    }
+
+    .legend-row { display: flex; justify-content: space-around; width: 100%; padding-top: 8px; border-top: 1px solid var(--line); }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 650; color: var(--muted); }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* Active Floating Timer Dock */
+    .timer-dock {
+      background: linear-gradient(135deg, var(--brand-deep), var(--brand));
+      color: #FFF; border-radius: 18px; padding: 12px 14px; margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(36,106,90,0.25);
+    }
+    .dock-left { display: flex; align-items: center; gap: 10px; }
+    .dock-pulse {
+      width: 10px; height: 10px; border-radius: 50%; background: #00E5A0;
+      box-shadow: 0 0 10px #00E5A0; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .dock-title { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.8); }
+    .dock-category { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+    .dock-time { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .dock-btn {
+      width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2);
+      border: none; color: #FFF; display: grid; place-items: center; font-size: 13px; cursor: pointer;
+    }
+
+    /* Pillars Grid */
+    .pillar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .pillar-card {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--card-radius);
+      padding: 12px 12px; display: flex; flex-direction: column; gap: 6px; position: relative;
+    }
+    .pillar-top { display: flex; justify-content: space-between; align-items: center; }
+    .pillar-name { font-size: 12px; font-weight: 750; }
+    .pillar-badge { font-size: 10px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .pillar-bar-bg { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin: 3px 0; }
+    .pillar-bar-fill { height: 100%; border-radius: 3px; }
+    .pillar-bottom { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+
+    /* Drift / Warning Alert Banner */
+    .drift-banner {
+      background: var(--drift-soft); border: 1px solid rgba(225,29,72,0.25); border-radius: 14px;
+      padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .drift-text { font-size: 11px; color: var(--drift-color); font-weight: 650; }
+    .drift-val { font-size: 12px; font-weight: 800; color: var(--drift-color); font-variant-numeric: tabular-nums; }
+
+    /* Tab Bar */
+    .tabbar {
+      position: absolute; left: 16px; right: 16px; bottom: 12px; height: 62px;
+      background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid var(--line);
+      border-radius: 24px; display: flex; justify-content: space-around; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06); z-index: 10;
+    }
+    .tab-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); font-weight: 600; }
+    .tab-btn.active { color: var(--brand); font-weight: 750; }
+    .tab-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* Timeline Stream Styles */
+    .timeline-stream { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; }
+    .timeline-item {
+      display: flex; gap: 12px; align-items: center; background: var(--surface);
+      border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+    }
+    .timeline-time { width: 50px; font-size: 11px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .timeline-block {
+      flex: 1; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 750;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* Modal / Sheet Overlay */
+    .sheet-card {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 28px 28px 0 0;
+      padding: 20px 18px 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.08); margin-top: auto;
+    }
+    .grab-bar { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 16px; }
+
+    /* Weekly Stats & Charts */
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .stat-box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; }
+    .stat-num { font-size: 18px; font-weight: 850; font-variant-numeric: tabular-nums; }
+    .stat-sub { font-size: 9px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+  </style>
+</head>
+<body class="d">
+  <div class="board">
+    <div class="board-head">
+      <div>
+        <div class="eyebrow">StriveRing · Native iOS 26 Visual Architecture</div>
+        <h1 id="direction-title">Direction 4: Clear Glass Signature</h1>
+        <p class="descriptor" id="direction-desc">
+          Sister app to Span. Frosted translucent white cards, dark forest weekly brand accents, 4-track Clear Glass Segmented Rhythm Ring with dedicated Drift (distraction) leak tracking, and rock-solid 8h focus calibration.
+        </p>
+      </div>
+      <div class="palette">
+        <div class="swatch" style="background:#246A5A;" title="Brand Forest"></div>
+        <div class="swatch" style="background:#00876C;" title="Focus 8h"></div>
+        <div class="swatch" style="background:#4A55A2;" title="Sleep 8h"></div>
+        <div class="swatch" style="background:#0284C7;" title="Workout 5x"></div>
+        <div class="swatch" style="background:#D97706;" title="Family / Kid"></div>
+        <div class="swatch" style="background:#E11D48;" title="Drift / Leak"></div>
+      </div>
+    </div>
+
+    <div class="screens">
+
+      <!-- SCREEN 1: Today Main -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 01</div>
+          <div class="screen-name">Today Main</div>
+          <div class="screen-note">Clear Glass Rhythm Ring with 4 target arcs + active timer dock.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content">
+              <div class="top-header">
+                <div>
+                  <div class="greeting">Good morning, Kedar</div>
+                  <div class="page-title">Today’s Rhythm</div>
+                </div>
+                <div class="date-badge">Sat, 5 Sep</div>
+              </div>
+
+              <!-- Rhythm Ring Hero -->
+              <div class="ring-hero">
+                <div class="ring-svg-wrap">
+                  <svg class="ring-svg" viewBox="0 0 200 200">
+                    <!-- Background tracks -->
+                    <circle cx="100" cy="100" r="82" fill="none" stroke="var(--line)" stroke-width="8" stroke-dasharray="2 6"/>
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--line)" stroke-width="8"/>
+                    <circle cx="100" cy="100" r="58" fill="none" stroke="var(--line)" stroke-width="8"/>
+                    <circle cx="100" cy="100" r="46" fill="none" stroke="var(--line)" stroke-width="8"/>
+                    
+                    <!-- Progress Arcs -->
+                    <!-- Sleep (7.5h / 8h = 94%) -->
+                    <circle cx="100" cy="100" r="82" fill="none" stroke="var(--sleep-color)" stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="515" stroke-dashoffset="31"/>
+                    <!-- Focus (6.5h / 8h = 81%) -->
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--focus-color)" stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="440" stroke-dashoffset="84"/>
+                    <!-- Workout (1h / 1h = 100%) -->
+                    <circle cx="100" cy="100" r="58" fill="none" stroke="var(--workout-color)" stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="364" stroke-dashoffset="0"/>
+                    <!-- Family (1.5h / 2h = 75%) -->
+                    <circle cx="100" cy="100" r="46" fill="none" stroke="var(--family-color)" stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="289" stroke-dashoffset="72"/>
+                  </svg>
+                  <div class="ring-center">
+                    <div class="ring-score">84</div>
+                    <div class="ring-sub">ALIGNMENT</div>
+                    <div class="ring-status-pill">★ On Track</div>
+                  </div>
+                </div>
+                <div class="legend-row">
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--focus-color)"></div>Focus 6.5h</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--sleep-color)"></div>Sleep 7.5h</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--workout-color)"></div>Workout ✓</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--family-color)"></div>Family 1.5h</div>
+                </div>
+              </div>
+
+              <!-- Active Focus Stopwatch Dock -->
+              <div class="timer-dock">
+                <div class="dock-left">
+                  <div class="dock-pulse"></div>
+                  <div>
+                    <div class="dock-title">ACTIVE SESSION</div>
+                    <div class="dock-category">Focus Work · Deep Code</div>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="dock-time">02:14:38</div>
+                  <button class="dock-btn">■</button>
+                </div>
+              </div>
+
+              <!-- Drift Alert (YouTube/Instagram) -->
+              <div class="drift-banner">
+                <div class="drift-text">⚠ Mindless Screen / Drift Logged</div>
+                <div class="drift-val">-45m (-5 pts)</div>
+              </div>
+
+              <!-- Pillar Grid -->
+              <div class="pillar-grid">
+                <div class="pillar-card">
+                  <div class="pillar-top">
+                    <span class="pillar-name" style="color:var(--focus-color)">Focus Work</span>
+                    <span class="pillar-badge" style="color:var(--focus-color)">6.5 / 8.0h</span>
+                  </div>
+                  <div class="pillar-bar-bg"><div class="pillar-bar-fill" style="width:81%; background:var(--focus-color)"></div></div>
+                  <div class="pillar-bottom"><span>Locked in ≥6h</span><span>+32 pts</span></div>
+                </div>
+
+                <div class="pillar-card">
+                  <div class="pillar-top">
+                    <span class="pillar-name" style="color:var(--workout-color)">Workout</span>
+                    <span class="pillar-badge" style="color:var(--workout-color)">Day 5 of 6</span>
+                  </div>
+                  <div class="pillar-bar-bg"><div class="pillar-bar-fill" style="width:100%; background:var(--workout-color)"></div></div>
+                  <div class="pillar-bottom"><span>60m Heavy Pull</span><span>+20 pts</span></div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="tabbar">
+              <div class="tab-btn active"><svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>Today</div>
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Timeline</div>
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Trends</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: Active Session Mode -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 02</div>
+          <div class="screen-name">Focus Chamber</div>
+          <div class="screen-note">Full-screen calm focus glass view with live timer & pause controls.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:42</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content" style="justify-content:center; align-items:center; text-align:center;">
+              <div style="font-size:12px; font-weight:800; color:var(--focus-color); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px;">
+                DEEP WORK CHAMBER
+              </div>
+              <div style="font-size:24px; font-weight:800; letter-spacing:-0.03em; margin-bottom:24px;">
+                System Architecture
+              </div>
+
+              <!-- Radial Focus Progress -->
+              <div style="width:220px; height:220px; position:relative; display:grid; place-items:center; margin-bottom:32px;">
+                <svg viewBox="0 0 100 100" style="position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg);">
+                  <circle cx="50" cy="50" r="44" fill="none" stroke="var(--line)" stroke-width="5"/>
+                  <circle cx="50" cy="50" r="44" fill="none" stroke="var(--focus-color)" stroke-width="5" stroke-dasharray="276" stroke-dashoffset="92" stroke-linecap="round"/>
+                </svg>
+                <div>
+                  <div style="font-size:46px; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:-0.04em;">
+                    02:14:38
+                  </div>
+                  <div style="font-size:11px; color:var(--muted); font-weight:700; margin-top:4px;">SESSION TARGET: 3h</div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; width:100%; max-width:280px;">
+                <button style="flex:1; height:48px; border-radius:16px; border:1px solid var(--line); background:var(--surface); font-weight:750; font-size:14px; cursor:pointer;">
+                  Pause
+                </button>
+                <button style="flex:1; height:48px; border-radius:16px; border:none; background:var(--brand); color:#FFF; font-weight:750; font-size:14px; cursor:pointer;">
+                  Finish Block
+                </button>
+              </div>
+
+              <div style="margin-top:24px; font-size:12px; color:var(--muted); background:var(--surface-2); padding:8px 16px; border-radius:12px;">
+                Locks in 6.0h daily threshold in 45 mins
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: Quick Block & Drift Log Sheet -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 03</div>
+          <div class="screen-name">Log Block / Leak</div>
+          <div class="screen-note">Frictionless entry for manual blocks and catching social media leaks.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:43</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content" style="padding-bottom:0;">
+              <div style="opacity:0.3; pointer-events:none;">
+                <div class="page-title">Today’s Rhythm</div>
+                <div class="ring-hero" style="height:100px;"></div>
+              </div>
+
+              <div class="sheet-card">
+                <div class="grab-bar"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                  <div style="font-size:18px; font-weight:800;">Log Time Block</div>
+                  <div style="font-size:12px; color:var(--brand); font-weight:750;">Done</div>
+                </div>
+
+                <!-- Category Pills -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
+                  <div style="padding:10px; border-radius:12px; border:2px solid var(--focus-color); background:var(--focus-soft); font-size:12px; font-weight:750; color:var(--focus-color); text-align:center;">
+                    Focus Work (8h)
+                  </div>
+                  <div style="padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); font-size:12px; font-weight:650; text-align:center;">
+                    Workout (5-6x)
+                  </div>
+                  <div style="padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); font-size:12px; font-weight:650; text-align:center;">
+                    Family & Kid Time
+                  </div>
+                  <div style="padding:10px; border-radius:12px; border:1px solid var(--drift-color); background:var(--drift-soft); font-size:12px; font-weight:750; color:var(--drift-color); text-align:center;">
+                    ⚠ Drift / Social Leak
+                  </div>
+                </div>
+
+                <!-- Quick Increments -->
+                <div style="font-size:11px; font-weight:750; color:var(--muted); margin-bottom:8px;">QUICK ADD DURATION</div>
+                <div style="display:flex; gap:8px; margin-bottom:18px;">
+                  <button style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-weight:750; font-size:13px;">+30m</button>
+                  <button style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-weight:750; font-size:13px;">+1 hr</button>
+                  <button style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-weight:750; font-size:13px;">+2 hr</button>
+                  <button style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-weight:750; font-size:13px;">Custom</button>
+                </div>
+
+                <button style="width:100%; height:48px; border-radius:16px; border:none; background:var(--brand); color:#FFF; font-weight:750; font-size:15px; cursor:pointer;">
+                  Confirm Entry
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 4: Timeline Stream -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 04</div>
+          <div class="screen-name">24h Timeline</div>
+          <div class="screen-note">Visual audit of the day's hours with unallocated drift exposed.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:44</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content">
+              <div class="top-header">
+                <div>
+                  <div class="greeting">Chronological Stream</div>
+                  <div class="page-title">Timeline</div>
+                </div>
+                <div class="date-badge">Today, 5 Sep</div>
+              </div>
+
+              <div class="timeline-stream">
+                <div class="timeline-item">
+                  <div class="timeline-time">11:00 PM</div>
+                  <div class="timeline-block" style="background:var(--sleep-soft); color:var(--sleep-color);">
+                    <span>Restorative Sleep</span><span>7h 30m</span>
+                  </div>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-time">07:00 AM</div>
+                  <div class="timeline-block" style="background:var(--workout-soft); color:var(--workout-color);">
+                    <span>Workout · Pull Day</span><span>1h 00m</span>
+                  </div>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-time">08:30 AM</div>
+                  <div class="timeline-block" style="background:var(--focus-soft); color:var(--focus-color);">
+                    <span>Deep Work · Sprint 1</span><span>3h 15m</span>
+                  </div>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-time">12:15 PM</div>
+                  <div class="timeline-block" style="background:var(--drift-soft); color:var(--drift-color); border:1px dashed var(--drift-color);">
+                    <span>⚠ YouTube / Social Drift</span><span>45m</span>
+                  </div>
+                </div>
+
+                <div class="timeline-item">
+                  <div class="timeline-time">01:30 PM</div>
+                  <div class="timeline-block" style="background:var(--focus-soft); color:var(--focus-color);">
+                    <span>Deep Work · Sprint 2 (Active)</span><span>2h 15m</span>
+                  </div>
+                </div>
+
+                <div class="timeline-item" style="border-style:dashed; opacity:0.6;">
+                  <div class="timeline-time">05:30 PM</div>
+                  <div class="timeline-block" style="background:var(--family-soft); color:var(--family-color);">
+                    <span>Scheduled · Kid & Family Time</span><span>2h 00m</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>Today</div>
+              <div class="tab-btn active"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Timeline</div>
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Trends</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 5: Trends & Weekly Accountability -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 05</div>
+          <div class="screen-name">Weekly Trends</div>
+          <div class="screen-note">Workout consistency (5/6 target) & total focus hours vs drift leaks.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:45</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content">
+              <div class="top-header">
+                <div>
+                  <div class="greeting">Weekly Report</div>
+                  <div class="page-title">Accountability</div>
+                </div>
+                <div class="date-badge">Week 36</div>
+              </div>
+
+              <!-- Top Metrics 3-Pack -->
+              <div class="stat-row">
+                <div class="stat-box">
+                  <div class="stat-num" style="color:var(--focus-color)">43.5h</div>
+                  <div class="stat-sub">Focus Locked</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-num" style="color:var(--workout-color)">5 of 6</div>
+                  <div class="stat-sub">Workouts ✓</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-num" style="color:var(--drift-color)">-4.2h</div>
+                  <div class="stat-sub">Drift Leak</div>
+                </div>
+              </div>
+
+              <!-- Workout Consistency Badge -->
+              <div class="pillar-card" style="margin-bottom:12px; background:linear-gradient(135deg,var(--surface),var(--surface-2));">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-size:13px; font-weight:800; color:var(--workout-color);">Workout Target: 5–6 / Week</div>
+                    <div style="font-size:11px; color:var(--muted); margin-top:2px;">Massive recovery: from 2/wk to 5/wk</div>
+                  </div>
+                  <div style="font-size:20px; font-weight:850; color:var(--workout-color);">83%</div>
+                </div>
+                <div style="display:flex; gap:6px; margin-top:10px;">
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--workout-color);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--workout-color);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--workout-color);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--workout-color);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--workout-color);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--line);"></div>
+                  <div style="flex:1; height:8px; border-radius:4px; background:var(--line);"></div>
+                </div>
+              </div>
+
+              <!-- Focus 8h Compliance -->
+              <div class="pillar-card" style="margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="font-size:12px; font-weight:750;">Focus Hours (≥6h threshold)</span>
+                  <span style="font-size:12px; font-weight:800; color:var(--focus-color);">5/5 Weekdays</span>
+                </div>
+                <div style="font-size:10px; color:var(--muted); margin-top:2px;">No slacking detected · Average 8.2h/day</div>
+              </div>
+
+              <!-- Drift Leak Analysis -->
+              <div class="pillar-card" style="border-color:rgba(225,29,72,0.2); background:var(--drift-soft);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; font-weight:800; color:var(--drift-color);">Drift Audit</span>
+                  <span style="font-size:12px; font-weight:850; color:var(--drift-color);">-4.2h</span>
+                </div>
+                <div style="font-size:10px; color:var(--drift-color); opacity:0.85; margin-top:4px;">
+                  YouTube (2.5h), Instagram (1.7h). Reclaiming this time adds 4+ hours for family.
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>Today</div>
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Timeline</div>
+              <div class="tab-btn active"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Trends</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 6: Pillar Calibration -->
+      <div class="screen-wrap">
+        <div class="screen-label">
+          <div class="screen-number">SCREEN 06</div>
+          <div class="screen-name">Calibration</div>
+          <div class="screen-note">Custom target tuning: 8h Focus gate, 6x workout goal, kid time.</div>
+        </div>
+        <div class="phone">
+          <div class="display">
+            <div class="status-bar">
+              <span>9:46</span>
+              <div class="status-icons"><div class="sig"></div><div class="battery"><div class="battery-fill"></div></div></div>
+            </div>
+            <div class="screen-content">
+              <div class="top-header">
+                <div>
+                  <div class="greeting">Settings & Tuning</div>
+                  <div class="page-title">Calibration</div>
+                </div>
+                <div class="date-badge">Profile</div>
+              </div>
+
+              <div class="pillar-card" style="margin-bottom:10px;">
+                <div style="font-size:12px; font-weight:800;">Focus Target & Floor</div>
+                <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:13px;">
+                  <span style="color:var(--muted)">Daily Requirement:</span>
+                  <span style="font-weight:750;">8.0 Hours</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:13px;">
+                  <span style="color:var(--muted)">Hard Minimum Gate:</span>
+                  <span style="font-weight:750; color:var(--focus-color)">6.0 Hours</span>
+                </div>
+              </div>
+
+              <div class="pillar-card" style="margin-bottom:10px;">
+                <div style="font-size:12px; font-weight:800;">Workout Frequency</div>
+                <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:13px;">
+                  <span style="color:var(--muted)">Target Sessions:</span>
+                  <span style="font-weight:750; color:var(--workout-color)">5 to 6 / week</span>
+                </div>
+              </div>
+
+              <div class="pillar-card" style="margin-bottom:10px;">
+                <div style="font-size:12px; font-weight:800;">Family & Kid Presence</div>
+                <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:13px;">
+                  <span style="color:var(--muted)">Uninterrupted Daily:</span>
+                  <span style="font-weight:750; color:var(--family-color)">2.0 Hours</span>
+                </div>
+              </div>
+
+              <div class="pillar-card" style="border-color:rgba(225,29,72,0.3); background:var(--drift-soft);">
+                <div style="font-size:12px; font-weight:800; color:var(--drift-color);">Drift Penalty Rule</div>
+                <div style="font-size:11px; color:var(--drift-color); opacity:0.9; margin-top:4px;">
+                  Social/video leaks deduct 5 points per 30 minutes to safeguard evening presence with kid.
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>Today</div>
+              <div class="tab-btn"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Timeline</div>
+              <div class="tab-btn active"><svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Trends</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const dir = params.get('direction') || 'd';
+    document.body.className = dir;
+
+    const titles = {
+      'a': { title: 'Direction 1: Precision Chrono', desc: 'Minimalist mechanical precision. Slate gray canvas, hairline 24-hour dial ticks, monospaced data density, and technical Swiss/German instrumentation.' },
+      'b': { title: 'Direction 2: Living Rhythm', desc: 'Biophilic sage canvas with fluid daylight gradient arcs. Soft pill-ended glass geometry designed to lower anxiety and restore natural daily flow.' },
+      'c': { title: 'Direction 3: Nordic Clarity', desc: 'Scandinavian functionalism. Dual semicircle architecture (Active Output vs Restorative Living) in crisp alpine cyan and deep navy.' },
+      'd': { title: 'Direction 4: Clear Glass Signature (Selected Ideal)', desc: 'Direct sister app to Span. Frosted translucent white cards, dark forest weekly brand accents, 4-track Clear Glass Segmented Rhythm Ring with dedicated Drift (distraction) leak tracking, and rock-solid 8h focus calibration.' },
+      'e': { title: 'Direction 5: High Contrast Obsidian', desc: 'Stark distraction-free editorial contrast. Charcoal ink, pure white frosted glass, with single vibrant emerald and coral alerts for active sessions and drift.' }
+    };
+
+    if (titles[dir]) {
+      document.getElementById('direction-title').innerText = titles[dir].title;
+      document.getElementById('direction-desc').innerText = titles[dir].desc;
+    }
+  </script>
+</body>
+</html>
