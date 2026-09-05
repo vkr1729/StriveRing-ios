@@ -80,137 +80,85 @@ extension View {
 struct ClearGlassRhythmRing: View {
     let result: DayResult
 
-    private var sleepFraction: Double {
-        result.pillarScore(for: .sleep).progressFraction
+    private struct Segment: Identifiable {
+        let id: String
+        let color: Color
+        let start: Double
+        let end: Double
     }
 
-    private var focusFraction: Double {
-        result.pillarScore(for: .focusWork).progressFraction
-    }
+    private var segments: [Segment] {
+        let totalDaySeconds: Double = 24.0 * 3600.0
 
-    private var workoutFraction: Double {
-        result.pillarScore(for: .workout).progressFraction
-    }
+        let sleepSec = result.pillarScore(for: .sleep).durationSeconds
+        let focusSec = result.pillarScore(for: .focusWork).durationSeconds
+        let workoutSec = result.pillarScore(for: .workout).durationSeconds
+        let familySec = result.pillarScore(for: .family).durationSeconds
+        let driftSec = result.pillarScore(for: .drift).durationSeconds
 
-    private var familyFraction: Double {
-        result.pillarScore(for: .family).progressFraction
-    }
+        var list: [Segment] = []
+        var current: Double = 0.0
 
-    var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                // Background Track Rings
-                RingTrack(radius: 82, strokeWidth: 8, color: Color.srLine, isDashed: true)
-                RingTrack(radius: 70, strokeWidth: 8, color: Color.srLine)
-                RingTrack(radius: 58, strokeWidth: 8, color: Color.srLine)
-                RingTrack(radius: 46, strokeWidth: 8, color: Color.srLine)
-
-                // Active Progress Arcs
-                // Track 1: Sleep (Outer, r=82)
-                ProgressArc(radius: 82, strokeWidth: 8, color: .srSleep, fraction: sleepFraction)
-
-                // Track 2: Focus Work (r=70)
-                ProgressArc(radius: 70, strokeWidth: 8, color: .srFocus, fraction: focusFraction)
-
-                // Track 3: Workout (r=58)
-                ProgressArc(radius: 58, strokeWidth: 8, color: .srWorkout, fraction: workoutFraction)
-
-                // Track 4: Family & Kid (Inner, r=46)
-                ProgressArc(radius: 46, strokeWidth: 8, color: .srFamily, fraction: familyFraction)
-
-                // Center Score Display
-                VStack(spacing: 2) {
-                    Text("\(result.totalScore)")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.srInk)
-                        .monospacedDigit()
-
-                    Text("ALIGNMENT")
-                        .font(.system(size: 9, weight: .heavy))
-                        .foregroundStyle(Color.srMutedInk)
-                        .tracking(1.2)
-
-                    Text(result.scoreLabel)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(result.totalScore >= 75 ? Color.srBrand : Color.srDrift)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(result.totalScore >= 75 ? Color.srBrandSoft : Color.srDriftSoft)
-                        .clipShape(Capsule())
-                        .padding(.top, 4)
-                }
-            }
-            .frame(width: 190, height: 190)
-
-            // Mini Legend Row
-            HStack(spacing: 12) {
-                LegendPill(color: .srSleep, label: "Sleep", value: result.pillarScore(for: .sleep).formattedDuration)
-                LegendPill(color: .srFocus, label: "Focus", value: result.pillarScore(for: .focusWork).formattedDuration)
-                LegendPill(color: .srWorkout, label: "Workout", value: result.pillarScore(for: .workout).formattedDuration)
-                LegendPill(color: .srFamily, label: "Family", value: result.pillarScore(for: .family).formattedDuration)
-            }
-            .padding(.top, 4)
+        func addSegment(id: String, duration: TimeInterval, color: Color) {
+            guard duration > 0 else { return }
+            let fraction = duration / totalDaySeconds
+            let start = current
+            let end = min(current + fraction, 1.0)
+            list.append(Segment(id: id, color: color, start: start, end: end))
+            current = end
         }
-        .clearGlass(radius: 28, padding: 18)
-    }
-}
 
-private struct RingTrack: View {
-    let radius: CGFloat
-    let strokeWidth: CGFloat
-    let color: Color
-    var isDashed: Bool = false
+        // Clockwise sequence starting from 12 o'clock
+        addSegment(id: "sleep", duration: sleepSec, color: .srSleep)
+        addSegment(id: "focus", duration: focusSec, color: .srFocus)
+        addSegment(id: "workout", duration: workoutSec, color: .srWorkout)
+        addSegment(id: "family", duration: familySec, color: .srFamily)
+        addSegment(id: "drift", duration: driftSec, color: .srDrift)
+
+        return list
+    }
 
     var body: some View {
-        Circle()
-            .stroke(
-                color,
-                style: StrokeStyle(
-                    lineWidth: strokeWidth,
-                    lineCap: .round,
-                    dash: isDashed ? [3, 6] : []
-                )
-            )
-            .frame(width: radius * 2, height: radius * 2)
-    }
-}
-
-private struct ProgressArc: View {
-    let radius: CGFloat
-    let strokeWidth: CGFloat
-    let color: Color
-    let fraction: Double
-
-    var body: some View {
-        Circle()
-            .trim(from: 0, to: CGFloat(min(max(fraction, 0), 1.0)))
-            .stroke(color, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
-            .rotationEffect(.degrees(-90))
-            .frame(width: radius * 2, height: radius * 2)
-            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: fraction)
-    }
-}
-
-private struct LegendPill: View {
-    let color: Color
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack(spacing: 4) {
+        ZStack {
+            // Base 24h Circular Track
             Circle()
-                .fill(color)
-                .frame(width: 6, height: 6)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(label)
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(Color.srMutedInk)
-                Text(value)
-                    .font(.system(size: 10, weight: .bold))
+                .stroke(Color.srSurfaceMuted, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                .frame(width: 200, height: 200)
+
+            // Colored Activity Segments
+            ForEach(segments) { seg in
+                Circle()
+                    .trim(from: seg.start, to: seg.end)
+                    .stroke(seg.color, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 200, height: 200)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8), value: seg.end)
+            }
+
+            // Center Score Display
+            VStack(spacing: 2) {
+                Text("\(result.totalScore)")
+                    .font(.system(size: 46, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.srInk)
                     .monospacedDigit()
+
+                Text("ALIGNMENT")
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundStyle(Color.srMutedInk)
+                    .tracking(1.4)
+
+                Text(result.scoreLabel)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(result.totalScore >= 75 ? Color.srBrand : Color.srDrift)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(result.totalScore >= 75 ? Color.srBrandSoft : Color.srDriftSoft)
+                    .clipShape(Capsule())
+                    .padding(.top, 4)
             }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
     }
 }
 

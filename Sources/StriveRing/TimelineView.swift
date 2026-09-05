@@ -10,7 +10,10 @@ struct TimelineView: View {
     private var groupedSessions: [(date: Date, sessions: [TimeSession])] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: sessions) { session in
-            calendar.startOfDay(for: session.startTime)
+            let attributionDate = (session.category == .sleep)
+                ? (session.endTime ?? session.startTime.addingTimeInterval(session.durationSeconds))
+                : session.startTime
+            return calendar.startOfDay(for: attributionDate)
         }
         return grouped
             .map { (date: $0.key, sessions: $0.value.sorted { $0.startTime > $1.startTime }) }
