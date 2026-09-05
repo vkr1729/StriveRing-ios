@@ -50,7 +50,7 @@ struct TimelineView: View {
                     }
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 24)
+                .padding(.bottom, 100)
             }
 
             if let undoSession {
@@ -60,7 +60,7 @@ struct TimelineView: View {
                     self.undoSession = nil
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 10)
+                .padding(.bottom, 75)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }

@@ -189,7 +189,7 @@ struct TrendsView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.srLine, lineWidth: 1))
                         }
                         .padding(.top, 4)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 100)
                     }
                     .padding(.horizontal, 18)
                 }

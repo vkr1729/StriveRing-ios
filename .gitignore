@@ -8,3 +8,4 @@ StriveRing.xcodeproj/
 Payload/
 *.ipa
 node_modules/
+*.db

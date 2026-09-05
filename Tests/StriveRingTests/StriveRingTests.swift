@@ -213,4 +213,33 @@ final class StriveRingTests: XCTestCase {
         let result = AlignmentEngine.calculate(sessions: [focus8h, sleep8h, workout60m, family2h], for: testWeekday)
         XCTAssertEqual(result.totalScore, 100, "Perfect day must equal 100 points exactly")
     }
+
+    // MARK: - 7. SessionManager Live Timer Reactivity
+
+    func testSessionManagerLiveTicking() {
+        let manager = SessionManager.shared
+        manager.startSession(category: .focusWork)
+        XCTAssertTrue(manager.isRunning)
+        XCTAssertEqual(manager.activeCategory, .focusWork)
+        XCTAssertEqual(manager.formattedElapsed, "00:00:00")
+
+        // Simulate tick
+        manager.liveElapsedSeconds = 65
+        XCTAssertEqual(manager.formattedElapsed, "00:01:05", "Observation property must format elapsed time")
+
+        _ = manager.stopSession()
+        XCTAssertFalse(manager.isRunning)
+        XCTAssertEqual(manager.liveElapsedSeconds, 0)
+    }
+
+    // MARK: - 8. Unlogged Gap Upkeep Logic
+
+    func testUnloggedGapPastDayCalculation() {
+        // Historical day where only 1h was logged, sleep was 8h (15h waking unlogged > 5h)
+        let focus1h = TimeSession(category: .focusWork, startTime: testWeekday, durationSeconds: 3600)
+        let sleep8h = TimeSession(category: .sleep, startTime: testWeekday, durationSeconds: 8 * 3600)
+
+        let result = AlignmentEngine.calculate(sessions: [focus1h, sleep8h], for: testWeekday)
+        XCTAssertTrue(result.isUnloggedGapHigh, "Historical day with 15h unlogged gap must flag as high")
+    }
 }
