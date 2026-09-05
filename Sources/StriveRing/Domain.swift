@@ -181,9 +181,13 @@ enum AlignmentEngine {
             fatalError("Invalid calendar day calculation")
         }
 
-        // Filter sessions for this specific day
+        // Filter sessions for this specific day:
+        // Sleep reflects on the day it ended (wake date); other activities reflect on start date.
         let daySessions = sessions.filter { session in
-            session.startTime >= dayStart && session.startTime < dayEnd
+            let attributionDate = (session.category == .sleep)
+                ? (session.endTime ?? session.startTime.addingTimeInterval(session.durationSeconds))
+                : session.startTime
+            return attributionDate >= dayStart && attributionDate < dayEnd
         }
 
         // Aggregate durations by pillar

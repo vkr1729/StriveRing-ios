@@ -131,6 +131,27 @@ final class StriveRingTests: XCTestCase {
         XCTAssertLessThanOrEqual(result.pillarScore(for: .sleep).points, 10.0, "Deficit sleep must be penalized")
     }
 
+    func testOvernightSleepReflectsOnWakeDay() {
+        // Sleep from Tuesday 11:00 PM to Wednesday 7:00 AM (8.0 hours)
+        let tuesdayNight = testWeekday.addingTimeInterval(-13 * 3600) // 11 PM Tuesday
+        let overnightSleep = TimeSession(
+            category: .sleep,
+            startTime: tuesdayNight,
+            endTime: testWeekday.addingTimeInterval(-5 * 3600), // 7 AM Wednesday
+            durationSeconds: 8.0 * 3600
+        )
+
+        // Calculated for Wednesday (wake day): must have full 8h sleep and 25 pts
+        let wednesdayResult = AlignmentEngine.calculate(sessions: [overnightSleep], for: testWeekday)
+        XCTAssertEqual(wednesdayResult.pillarScore(for: .sleep).durationSeconds, 8.0 * 3600)
+        XCTAssertEqual(wednesdayResult.pillarScore(for: .sleep).points, 25.0, accuracy: 0.1)
+
+        // Calculated for Tuesday (start day): must NOT have the sleep attributed to Tuesday
+        let tuesday = testWeekday.addingTimeInterval(-24 * 3600)
+        let tuesdayResult = AlignmentEngine.calculate(sessions: [overnightSleep], for: tuesday)
+        XCTAssertEqual(tuesdayResult.pillarScore(for: .sleep).durationSeconds, 0)
+    }
+
     // MARK: - 4. Drift Buffer & Tiered Penalties
 
     func testDriftWithin30MinuteGraceBuffer() {

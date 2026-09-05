@@ -42,7 +42,7 @@ final class SessionManager {
 
     var formattedElapsed: String {
         _ = liveElapsedSeconds
-        let total = Int(elapsedSeconds)
+        let total = Int(liveElapsedSeconds > 0 ? liveElapsedSeconds : elapsedSeconds)
         let hours = total / 3600
         let minutes = (total % 3600) / 60
         let seconds = total % 60
