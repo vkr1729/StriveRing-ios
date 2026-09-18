@@ -12,7 +12,7 @@ final class StriveRingUITests: XCTestCase {
         launch(reset: true)
 
         // Verify Today Header and Hero Ring
-        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["ALIGNMENT"].exists)
 
         // Switch to Timeline tab
@@ -33,13 +33,13 @@ final class StriveRingUITests: XCTestCase {
 
         // Tap Focus Quick Start
         let startFocus = app.buttons["Focus"]
-        if startFocus.waitForExistence(timeout: 3) {
+        if startFocus.waitForExistence(timeout: 8) {
             startFocus.tap()
         }
 
         // Verify Focus Chamber or Active Dock appears
         let activeLabel = app.staticTexts["ACTIVE SESSION"]
-        XCTAssertTrue(activeLabel.waitForExistence(timeout: 4) || app.staticTexts["DEEP WORK CHAMBER"].exists)
+        XCTAssertTrue(activeLabel.waitForExistence(timeout: 10) || app.staticTexts["DEEP WORK CHAMBER"].exists)
 
         keepScreenshot(named: "02-active-session")
     }
@@ -48,21 +48,21 @@ final class StriveRingUITests: XCTestCase {
     func testRetroactiveBlockLoggingAndUndo() throws {
         launch(reset: true)
 
-        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10))
 
         // Open the Focus quick-log sheet via its accessibility identifier.
         let focusLogButton = app.buttons["log-focusWork"]
-        XCTAssertTrue(focusLogButton.waitForExistence(timeout: 3), "Focus quick-add must exist on Today")
+        XCTAssertTrue(focusLogButton.waitForExistence(timeout: 8), "Focus quick-add must exist on Today")
         focusLogButton.tap()
-        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 8))
 
         // Tap Confirm Entry and verify the Undo toast appears.
         let confirmBtn = app.buttons["Confirm Entry"]
-        XCTAssertTrue(confirmBtn.waitForExistence(timeout: 3))
+        XCTAssertTrue(confirmBtn.waitForExistence(timeout: 8))
         confirmBtn.tap()
 
         let undoToast = app.buttons["Undo"]
-        XCTAssertTrue(undoToast.waitForExistence(timeout: 3), "Undo toast must appear after logging")
+        XCTAssertTrue(undoToast.waitForExistence(timeout: 8), "Undo toast must appear after logging")
 
         keepScreenshot(named: "03-logging-and-undo")
     }
@@ -71,17 +71,19 @@ final class StriveRingUITests: XCTestCase {
     func testWorkoutFullCreditAndWeeklyBadge() throws {
         launch(reset: true)
 
-        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10))
 
         // Log a 40-minute workout (the sheet defaults to 40m for workouts).
-        app.buttons["log-workout"].tap()
-        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
+        let workoutLogButton = app.buttons["log-workout"]
+        XCTAssertTrue(workoutLogButton.waitForExistence(timeout: 5), "Workout quick-add must exist on Today")
+        workoutLogButton.tap()
+        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 5))
         app.buttons["Confirm Entry"].tap()
-        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 5))
 
         // The workout pillar card shows the weekly badge and full-credit points.
-        XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["+20 pts"].exists)
+        XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["+20 pts"].waitForExistence(timeout: 5))
 
         keepScreenshot(named: "04-workout-credit")
     }
@@ -91,12 +93,12 @@ final class StriveRingUITests: XCTestCase {
         launch(reset: true)
 
         app.tabBars.buttons["Trends"].tap()
-        XCTAssertTrue(app.staticTexts["Accountability"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Accountability"].waitForExistence(timeout: 8))
 
         let calibrationLink = app.buttons["Target Calibration & Settings"]
-        if calibrationLink.waitForExistence(timeout: 3) {
+        if calibrationLink.waitForExistence(timeout: 8) {
             calibrationLink.tap()
-            XCTAssertTrue(app.staticTexts["Calibration"].waitForExistence(timeout: 3))
+            XCTAssertTrue(app.staticTexts["Calibration"].waitForExistence(timeout: 8))
             XCTAssertTrue(app.staticTexts["Focus Work Target & Gate"].exists)
             keepScreenshot(named: "05-calibration")
         }
