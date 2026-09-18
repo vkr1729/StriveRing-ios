@@ -6,7 +6,6 @@ struct TodayView: View {
     @Query(sort: \TimeSession.startTime, order: .reverse) private var sessions: [TimeSession]
 
     @State private var sessionManager = SessionManager.shared
-    @State private var isShowingLogSheet = false
     @State private var selectedLogCategory: PillarKind? = nil
     @State private var isShowingFocusChamber = false
     @State private var undoSession: TimeSession? = nil
@@ -159,8 +158,8 @@ struct TodayView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .sheet(isPresented: $isShowingLogSheet) {
-            LogBlockSheet(initialCategory: selectedLogCategory ?? .focusWork) { session in
+        .sheet(item: $selectedLogCategory) { category in
+            LogBlockSheet(initialCategory: category) { session in
                 modelContext.insert(session)
                 try? modelContext.save()
                 self.undoSession = session
@@ -265,7 +264,6 @@ struct TodayView: View {
 
     private func openLog(for category: PillarKind) {
         selectedLogCategory = category
-        isShowingLogSheet = true
     }
 
     private func concludeActiveSession() {
