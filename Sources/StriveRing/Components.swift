@@ -213,7 +213,7 @@ struct ActiveTimerDock: View {
                     Image(systemName: sessionManager.isPaused ? "play.fill" : "pause.fill")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(Color.white)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                         .background(Color.white.opacity(0.2))
                         .clipShape(Circle())
                 }
@@ -225,7 +225,7 @@ struct ActiveTimerDock: View {
                     Image(systemName: "stop.fill")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(Color.white)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 44, height: 44)
                         .background(Color.srDrift)
                         .clipShape(Circle())
                 }

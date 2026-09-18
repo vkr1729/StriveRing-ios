@@ -1,11 +1,22 @@
+import SwiftData
 import SwiftUI
 
 struct FocusChamberView: View {
     @Bindable var sessionManager: SessionManager
     let onFinish: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \TimeSession.startTime, order: .reverse) private var sessions: [TimeSession]
 
     @State private var plannedTargetHours: Double = 3.0
+
+    private var loggedFocusHoursToday: Double {
+        AlignmentEngine.calculate(sessions: sessions, for: .now)
+            .pillarScore(for: .focusWork).durationSeconds / 3600.0
+    }
+
+    private var totalFocusHoursToday: Double {
+        loggedFocusHoursToday + (sessionManager.elapsedSeconds / 3600.0)
+    }
 
     var body: some View {
         ZStack {
@@ -79,8 +90,7 @@ struct FocusChamberView: View {
                 .padding(.vertical, 12)
 
                 // Status Nudge
-                let currentTotalFocusHours = (sessionManager.elapsedSeconds / 3600.0)
-                let remainingToGate = max(0, 6.0 - currentTotalFocusHours)
+                let remainingToGate = max(0, 6.0 - totalFocusHoursToday)
                 if remainingToGate > 0 {
                     HStack(spacing: 6) {
                         Image(systemName: "lock.fill")
@@ -106,6 +116,16 @@ struct FocusChamberView: View {
                     .background(Color.srBrandSoft)
                     .clipShape(Capsule())
                 }
+
+                // Target duration picker
+                Picker("Planned block", selection: $plannedTargetHours) {
+                    Text("1H").tag(1.0)
+                    Text("2H").tag(2.0)
+                    Text("3H").tag(3.0)
+                    Text("4H").tag(4.0)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 24)
 
                 Spacer()
 

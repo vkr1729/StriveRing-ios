@@ -2,6 +2,25 @@ name: Build StriveRing iOS
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'Tests/**'
+      - 'Resources/**'
+      - 'project.yml'
+      - '.github/workflows/build-ios.yml'
+  pull_request:
+    paths:
+      - 'Sources/**'
+      - 'Tests/**'
+      - 'Resources/**'
+      - 'project.yml'
+      - '.github/workflows/build-ios.yml'
+
+concurrency:
+  group: build-ios-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -15,8 +34,8 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v6
 
-      - name: Select Xcode 26.6
-        run: sudo xcode-select -s /Applications/Xcode_26.6.app/Contents/Developer
+      - name: Select latest Xcode 26
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)/Contents/Developer" && xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen

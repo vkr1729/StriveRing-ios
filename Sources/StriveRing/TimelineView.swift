@@ -5,7 +5,36 @@ struct TimelineView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \TimeSession.startTime, order: .reverse) private var sessions: [TimeSession]
 
-    @State private var undoSession: TimeSession?
+    @State private var undoSession: DeletedSessionSnapshot?
+
+    struct DeletedSessionSnapshot: Identifiable {
+        let id: UUID
+        let category: PillarKind
+        let startTime: Date
+        let endTime: Date?
+        let durationSeconds: TimeInterval
+        let note: String?
+
+        init(session: TimeSession) {
+            self.id = session.id
+            self.category = session.category
+            self.startTime = session.startTime
+            self.endTime = session.endTime
+            self.durationSeconds = session.durationSeconds
+            self.note = session.note
+        }
+
+        func restored() -> TimeSession {
+            TimeSession(
+                id: id,
+                category: category,
+                startTime: startTime,
+                endTime: endTime,
+                durationSeconds: durationSeconds,
+                note: note
+            )
+        }
+    }
 
     private var groupedSessions: [(date: Date, sessions: [TimeSession])] {
         let calendar = Calendar.current
@@ -58,7 +87,7 @@ struct TimelineView: View {
 
             if let undoSession {
                 UndoToast(message: "Deleted \(undoSession.category.title)") {
-                    modelContext.insert(undoSession)
+                    modelContext.insert(undoSession.restored())
                     try? modelContext.save()
                     self.undoSession = nil
                 }
@@ -88,7 +117,7 @@ struct TimelineView: View {
     }
 
     private func deleteSession(_ session: TimeSession) {
-        undoSession = session
+        undoSession = DeletedSessionSnapshot(session: session)
         modelContext.delete(session)
         try? modelContext.save()
 
@@ -187,7 +216,8 @@ private struct TimelineRow: View {
                     Image(systemName: "trash")
                         .font(.system(size: 10))
                         .foregroundStyle(Color.srMutedInk.opacity(0.6))
-                        .frame(width: 24, height: 24)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Delete session")
             }

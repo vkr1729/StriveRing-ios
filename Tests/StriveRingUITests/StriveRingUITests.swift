@@ -48,24 +48,57 @@ final class StriveRingUITests: XCTestCase {
     func testRetroactiveBlockLoggingAndUndo() throws {
         launch(reset: true)
 
-        // Open quick add for Focus
-        let quickAddButtons = app.buttons.matching(identifier: "plus")
-        if quickAddButtons.count > 0 {
-            quickAddButtons.firstMatch.tap()
-            XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
 
-            // Tap Confirm Entry
-            let confirmBtn = app.buttons["Confirm Entry"]
-            if confirmBtn.exists {
-                confirmBtn.tap()
-            }
+        // Open the Focus quick-log sheet via its accessibility identifier.
+        let focusLogButton = app.buttons["log-focusWork"]
+        XCTAssertTrue(focusLogButton.waitForExistence(timeout: 3), "Focus quick-add must exist on Today")
+        focusLogButton.tap()
+        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
 
-            // Verify Undo Toast appears
-            let undoToast = app.buttons["Undo"]
-            XCTAssertTrue(undoToast.waitForExistence(timeout: 3))
-        }
+        // Tap Confirm Entry and verify the Undo toast appears.
+        let confirmBtn = app.buttons["Confirm Entry"]
+        XCTAssertTrue(confirmBtn.waitForExistence(timeout: 3))
+        confirmBtn.tap()
+
+        let undoToast = app.buttons["Undo"]
+        XCTAssertTrue(undoToast.waitForExistence(timeout: 3), "Undo toast must appear after logging")
 
         keepScreenshot(named: "03-logging-and-undo")
+    }
+
+    @MainActor
+    func testFocusGateAndDriftCardsRender() throws {
+        launch(reset: true)
+
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
+
+        // Log a 40-minute workout: it must earn full credit and show the weekly badge.
+        app.buttons["log-workout"].tap()
+        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
+        app.buttons["Confirm Entry"].tap()
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
+
+        // Workout pillar card must reflect the qualifying session.
+        XCTAssertTrue(app.staticTexts["Full Credit (+20 pts)"].waitForExistence(timeout: 3))
+
+        keepScreenshot(named: "04-workout-credit")
+    }
+
+    @MainActor
+    func testCalibrationExportAndResetPresent() throws {
+        launch(reset: true)
+
+        app.tabBars.buttons["Trends"].tap()
+        XCTAssertTrue(app.staticTexts["Accountability"].waitForExistence(timeout: 3))
+
+        let calibrationLink = app.buttons["Target Calibration & Settings"]
+        if calibrationLink.waitForExistence(timeout: 3) {
+            calibrationLink.tap()
+            XCTAssertTrue(app.staticTexts["Calibration"].waitForExistence(timeout: 3))
+            XCTAssertTrue(app.staticTexts["Focus Work Target & Gate"].exists)
+            keepScreenshot(named: "05-calibration")
+        }
     }
 
     // MARK: - Helpers

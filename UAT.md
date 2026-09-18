@@ -4,36 +4,51 @@
 
 Validate the complete daily time rhythm, active timer resilience, focus lock-in gate, workout turnaround, and drift audit on an iPhone 17 simulator running iOS 26.5.
 
-## Automated Acceptance Journeys
+Device note: the shipped `.ipa` targets sideloading via **SideStore / LiveContainer on iPhone 16**. LiveContainer suspends background apps aggressively, so timer journeys below explicitly cover backgrounding, relaunch persistence, and runaway-session trim.
 
-1. **Active Stopwatch & Background Resilience**
-   - Start an active Focus Work session in the floating dock.
-   - Pause session, simulate background elapsed time, and resume. Verify exact elapsed seconds calculation with zero timer drift.
-   - Conclude session and verify immediate SwiftData persistence and ring recalculation.
+## Automated acceptance (unit + UI)
 
-2. **Enforce the 8h Focus Work & 6h Lock-in Gate**
-   - On a weekday, log 4.0h Focus: verify score is 20 pts and badge warns *"2.0h remaining to 6h lock-in gate"*.
-   - Log past 6.0h: verify milestone unlocks +30 pts and displays `★ 6.0h Gate Achieved`.
-   - Log past 8.0h: verify score caps at 40 pts without infinite over-farming.
+Unit tests (`Tests/StriveRingTests`) cover the scoring engine directly:
 
-3. **Workout Rebound & 40-Minute Full Credit**
-   - Log a 40-minute workout session.
-   - Verify it receives full **+20 points** and advances the weekly consistency badge (`Day 5 of 6`).
+| Case | Expectation |
+| :--- | :--- |
+| 4.0h Focus on weekday | 20 pts, gate open, 2.0h remaining |
+| Exactly 6.0h Focus | 30 pts, `★ 6.0h Gate Locked In` |
+| 8.0h / 12.0h Focus | Capped at 40 pts |
+| 40m Workout | +20 pts, weekly count +1 |
+| 20m Workout | Partial credit, not complete |
+| 7.5h Sleep | 25 pts; 5h deficit penalized |
+| Overnight sleep (Tue 11pm → Wed 7am) | Attributed to Wednesday (wake day), not Tuesday |
+| 25m Drift | 0 penalty (grace buffer) |
+| 45m / 80m / 120m Drift | −5 / −10 / −20 pts |
+| Weekend (4h family, 8h sleep, 40m workout) | 80 pts, gate auto-satisfied |
+| Perfect weekday | Exactly 100 (clamped) |
+| Unlogged historical day | `isUnloggedGapHigh` flagged |
+| `SessionManager` tick/pause/resume/stop | True start preserved across pause/resume; orphaned session returned, never discarded |
 
-4. **Drift Buffer & Penalty Rule**
-   - Log 25 minutes of YouTube: verify **0 penalty points** (within the 30-min free grace buffer).
-   - Log 45 minutes of YouTube: verify **-5 points** penalty triggers and displays in the alert banner.
-   - Verify unlogged waking gaps > 5.0 hours trigger the upkeep check reminder on the 24-hour timeline.
+Simulator UI journeys (`Tests/StriveRingUITests`):
 
-5. **Weekend Dynamic Profile Shift**
-   - Set day to Saturday: verify 8h Focus gate is suspended and Family + Workout drive the daily alignment.
+1. **Launch & tab navigation** — `Today’s Rhythm` + `ALIGNMENT` render; Timeline shows `24h Timeline`; Trends shows `Accountability` and the workout target card.
+2. **Active session start** — Focus quick-start opens the chamber or the `ACTIVE SESSION` dock.
+3. **Retroactive logging + undo** — Focus quick-add opens `Log Time Block`, Confirm writes the session, `Undo` toast appears.
+4. **Workout full credit** — 40m workout logs and the pillar card shows `Full Credit (+20 pts)`.
+5. **Calibration** — Trends → Calibration renders the gate, workout, family, weekend, and drift rule cards.
 
-6. **Information Architecture & Adaptive Navigation**
-   - Verify all 3 primary tabs (`Today`, `Timeline`, `Trends`) and sheets (`Focus Chamber`, `Log Block`) render cleanly in light-first Clear Glass.
-   - Verify touch targets meet or exceed 44 × 44 pt and support Dynamic Type.
+## Manual UAT checklist (iPhone 16 via LiveContainer)
 
-## Release Gate
+Run these once per release on-device; each takes seconds.
 
-- All unit tests and all 6 simulator UAT journeys pass cleanly on iOS 26.5.
-- Zero crash, zero timer drift, zero lost sessions, and zero visual truncation.
-- A fresh, sideloadable `StriveRing-unsigned-ipa` is generated and uploaded as a GitHub Actions artifact.
+- [ ] **Fresh install shows empty state** — Today ring at 0, Timeline shows “No Sessions Logged Yet”, no crashes.
+- [ ] **Live session survives backgrounding** — start Focus, lock phone 60s, reopen: elapsed matches wall clock (no reset, no jump).
+- [ ] **Live session survives LiveContainer relaunch** — start Workout, force-close, reopen: timer resumes from `UserDefaults` state.
+- [ ] **Runaway prompt** — a 4h+ non-sleep session offers Keep / Trim 3h / Trim 4h / Cancel; each persists correctly.
+- [ ] **Gate copy is honest** — with 5h already logged, Focus Chamber shows ~1.0h remaining, not 6.0h.
+- [ ] **Quick-log defaults match category** — Workout opens at 40m, Sleep at 7h30m, Focus at 1h30m.
+- [ ] **Undo works on both tabs** — Today toast restores the logged entry; Timeline delete toast restores the deleted entry.
+- [ ] **Feel check** — tab switches, ring animation, and timer tick all feel instant (1s tick, spring ring, no hitches on iPhone 16).
+
+## Release gate
+
+- All unit tests and all simulator UI journeys pass on iOS 26.5.
+- Zero crash, zero timer drift, zero lost sessions, zero visual truncation.
+- A fresh, sideloadable `StriveRing-unsigned-ipa` is generated and uploaded as a GitHub Actions artifact (built on every push to `main`, every PR touching app code, and on demand via workflow dispatch).

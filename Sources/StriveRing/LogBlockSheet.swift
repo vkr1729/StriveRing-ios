@@ -12,7 +12,18 @@ struct LogBlockSheet: View {
     init(initialCategory: PillarKind = .focusWork, onSave: @escaping (TimeSession) -> Void) {
         self.initialCategory = initialCategory
         self._selectedCategory = State(initialValue: initialCategory)
+        self._durationMinutes = State(initialValue: LogBlockSheet.defaultDuration(for: initialCategory))
         self.onSave = onSave
+    }
+
+    private static func defaultDuration(for kind: PillarKind) -> Int {
+        switch kind {
+        case .focusWork: return 90
+        case .workout: return 40
+        case .sleep: return 450
+        case .family: return 120
+        case .drift: return 45
+        }
     }
 
     var body: some View {
@@ -89,14 +100,30 @@ struct LogBlockSheet: View {
                                 .foregroundStyle(Color.srInk)
                                 .monospacedDigit()
                         }
+                        .accessibilityIdentifier("log-duration-stepper")
                     }
                     .padding(14)
                     .background(Color.srSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.srLine, lineWidth: 1))
 
-                    // Drift Grace Rule / Workout Note Box
-                    if selectedCategory == .drift {
+                    // Focus gate / workout note box
+                    if selectedCategory == .focusWork {
+                        let gateHours = 6.0
+                        let currentHours = Double(durationMinutes) / 60.0
+                        HStack(spacing: 8) {
+                            Image(systemName: currentHours >= gateHours ? "checkmark.seal.fill" : "lock.fill")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.srFocus)
+                            Text(currentHours >= gateHours ? "Clears the 6.0h weekday gate contribution" : String(format: "%.1fh more in this entry clears the 6.0h gate", gateHours - currentHours))
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.srFocus)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(10)
+                        .background(Color.srFocusSoft)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    } else if selectedCategory == .drift {
                         HStack(spacing: 8) {
                             Image(systemName: "info.circle.fill")
                                 .font(.system(size: 13, weight: .bold))
@@ -172,13 +199,7 @@ struct LogBlockSheet: View {
     }
 
     private func setDefaultDuration(for kind: PillarKind) {
-        switch kind {
-        case .focusWork: durationMinutes = 90
-        case .workout: durationMinutes = 40
-        case .sleep: durationMinutes = 450 // 7.5h
-        case .family: durationMinutes = 120
-        case .drift: durationMinutes = 45
-        }
+        durationMinutes = LogBlockSheet.defaultDuration(for: kind)
     }
 
     private func quickOptions(for kind: PillarKind) -> [Int] {

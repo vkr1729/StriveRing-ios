@@ -177,9 +177,7 @@ enum AlignmentEngine {
         calendar: Calendar = .current
     ) -> DayResult {
         let dayStart = calendar.startOfDay(for: date)
-        guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else {
-            fatalError("Invalid calendar day calculation")
-        }
+        let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86400)
 
         // Filter sessions for this specific day:
         // Sleep reflects on the day it ended (wake date); other activities reflect on start date.

@@ -8,6 +8,7 @@ final class SessionManager {
 
     var activeCategory: PillarKind?
     var startTime: Date?
+    var sessionStartDate: Date?
     var accumulatedSeconds: TimeInterval = 0
     var isPaused: Bool = false
     var sessionNote: String?
@@ -18,6 +19,7 @@ final class SessionManager {
 
     private let userDefaultsCategoryKey = "StriveRing_ActiveCategory"
     private let userDefaultsStartTimeKey = "StriveRing_StartTime"
+    private let userDefaultsSessionStartKey = "StriveRing_SessionStart"
     private let userDefaultsAccumulatedKey = "StriveRing_Accumulated"
     private let userDefaultsIsPausedKey = "StriveRing_IsPaused"
     private let userDefaultsNoteKey = "StriveRing_Note"
@@ -49,10 +51,14 @@ final class SessionManager {
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 
-    func startSession(category: PillarKind, note: String? = nil) {
-        // If already running another session, stop it first or ignore
+    @discardableResult
+    func startSession(category: PillarKind, note: String? = nil) -> TimeSession? {
+        // Preserve any in-flight session instead of silently discarding it.
+        let orphaned = activeCategory != nil ? stopSession() : nil
         self.activeCategory = category
-        self.startTime = .now
+        let now = Date.now
+        self.startTime = now
+        self.sessionStartDate = now
         self.accumulatedSeconds = 0
         self.isPaused = false
         self.sessionNote = note
@@ -60,11 +66,15 @@ final class SessionManager {
 
         persistState()
         startTimer()
+        return orphaned
     }
 
     func pauseSession() {
         guard !isPaused, let startTime else { return }
         accumulatedSeconds += max(0, Date.now.timeIntervalSince(startTime))
+        if sessionStartDate == nil {
+            sessionStartDate = startTime.addingTimeInterval(-accumulatedSeconds)
+        }
         self.startTime = nil
         self.isPaused = true
         self.liveElapsedSeconds = accumulatedSeconds
@@ -86,11 +96,12 @@ final class SessionManager {
     func stopSession() -> TimeSession? {
         guard let category = activeCategory else { return nil }
         let totalDuration = elapsedSeconds
+        let endDate = Date.now
 
         let session = TimeSession(
             category: category,
-            startTime: (startTime ?? .now).addingTimeInterval(-totalDuration),
-            endTime: .now,
+            startTime: sessionStartDate ?? endDate.addingTimeInterval(-totalDuration),
+            endTime: endDate,
             durationSeconds: totalDuration,
             note: sessionNote
         )
@@ -102,11 +113,16 @@ final class SessionManager {
     func trimSession(to newDurationSeconds: TimeInterval) -> TimeSession? {
         guard let category = activeCategory else { return nil }
 
+        let endDate = Date.now
+        let earliestStart = sessionStartDate ?? endDate.addingTimeInterval(-elapsedSeconds)
+        let requestedStart = endDate.addingTimeInterval(-newDurationSeconds)
+        let trimmedStart = max(earliestStart, requestedStart)
+
         let session = TimeSession(
             category: category,
-            startTime: Date.now.addingTimeInterval(-newDurationSeconds),
-            endTime: .now,
-            durationSeconds: newDurationSeconds,
+            startTime: trimmedStart,
+            endTime: endDate,
+            durationSeconds: endDate.timeIntervalSince(trimmedStart),
             note: sessionNote
         )
 
@@ -157,12 +173,14 @@ final class SessionManager {
         if let category = activeCategory {
             defaults.set(category.rawValue, forKey: userDefaultsCategoryKey)
             defaults.set(startTime?.timeIntervalSince1970, forKey: userDefaultsStartTimeKey)
+            defaults.set(sessionStartDate?.timeIntervalSince1970, forKey: userDefaultsSessionStartKey)
             defaults.set(accumulatedSeconds, forKey: userDefaultsAccumulatedKey)
             defaults.set(isPaused, forKey: userDefaultsIsPausedKey)
             defaults.set(sessionNote, forKey: userDefaultsNoteKey)
         } else {
             defaults.removeObject(forKey: userDefaultsCategoryKey)
             defaults.removeObject(forKey: userDefaultsStartTimeKey)
+            defaults.removeObject(forKey: userDefaultsSessionStartKey)
             defaults.removeObject(forKey: userDefaultsAccumulatedKey)
             defaults.removeObject(forKey: userDefaultsIsPausedKey)
             defaults.removeObject(forKey: userDefaultsNoteKey)
@@ -181,6 +199,9 @@ final class SessionManager {
         self.accumulatedSeconds = defaults.double(forKey: userDefaultsAccumulatedKey)
         self.sessionNote = defaults.string(forKey: userDefaultsNoteKey)
 
+        let sessionStartTimestamp = defaults.double(forKey: userDefaultsSessionStartKey)
+        self.sessionStartDate = sessionStartTimestamp > 0 ? Date(timeIntervalSince1970: sessionStartTimestamp) : nil
+
         let startTimestamp = defaults.double(forKey: userDefaultsStartTimeKey)
         if startTimestamp > 0 && !isPaused {
             self.startTime = Date(timeIntervalSince1970: startTimestamp)
@@ -197,6 +218,7 @@ final class SessionManager {
         stopTimer()
         self.activeCategory = nil
         self.startTime = nil
+        self.sessionStartDate = nil
         self.accumulatedSeconds = 0
         self.isPaused = false
         self.sessionNote = nil

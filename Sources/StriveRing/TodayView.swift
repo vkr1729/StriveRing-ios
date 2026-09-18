@@ -15,6 +15,16 @@ struct TodayView: View {
         AlignmentEngine.calculate(sessions: sessions, for: .now)
     }
 
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: .now)
+        switch hour {
+        case 5..<12: return "Good morning, Kedar"
+        case 12..<17: return "Good afternoon, Kedar"
+        case 17..<22: return "Good evening, Kedar"
+        default: return "Good night, Kedar"
+        }
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.srCanvas.ignoresSafeArea()
@@ -24,7 +34,7 @@ struct TodayView: View {
                     // Header
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Good morning, Kedar")
+                            Text(greeting)
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(Color.srMutedInk)
                             Text("Today’s Rhythm")
@@ -203,16 +213,16 @@ struct TodayView: View {
 
             HStack(spacing: 8) {
                 QuickStartButton(pillar: .focusWork) {
-                    sessionManager.startSession(category: .focusWork)
+                    persistOrphaned(sessionManager.startSession(category: .focusWork))
                     isShowingFocusChamber = true
                 }
 
                 QuickStartButton(pillar: .workout) {
-                    sessionManager.startSession(category: .workout)
+                    persistOrphaned(sessionManager.startSession(category: .workout))
                 }
 
                 QuickStartButton(pillar: .family) {
-                    sessionManager.startSession(category: .family)
+                    persistOrphaned(sessionManager.startSession(category: .family))
                 }
             }
         }
@@ -260,14 +270,24 @@ struct TodayView: View {
 
     private func concludeActiveSession() {
         if let session = sessionManager.stopSession() {
-            modelContext.insert(session)
-            try? modelContext.save()
-            self.undoSession = session
-            Task {
-                try? await Task.sleep(for: .seconds(4))
-                if self.undoSession?.id == session.id {
-                    self.undoSession = nil
-                }
+            persistConcluded(session)
+        }
+    }
+
+    private func persistOrphaned(_ session: TimeSession?) {
+        if let session {
+            persistConcluded(session)
+        }
+    }
+
+    private func persistConcluded(_ session: TimeSession) {
+        modelContext.insert(session)
+        try? modelContext.save()
+        self.undoSession = session
+        Task {
+            try? await Task.sleep(for: .seconds(4))
+            if self.undoSession?.id == session.id {
+                self.undoSession = nil
             }
         }
     }
@@ -317,10 +337,11 @@ private struct PillarCard: View {
                     Image(systemName: "plus")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(Color.srMutedInk)
-                        .frame(width: 22, height: 22)
+                        .frame(width: 44, height: 44)
                         .background(Color.srSurfaceMuted)
                         .clipShape(Circle())
                 }
+                .accessibilityIdentifier("log-\(pillar.rawValue)")
             }
 
             Text(score.formattedDuration)

@@ -239,18 +239,42 @@ final class StriveRingTests: XCTestCase {
 
     func testSessionManagerLiveTicking() {
         let manager = SessionManager.shared
+        manager.cancelSession()
         manager.startSession(category: .focusWork)
         XCTAssertTrue(manager.isRunning)
         XCTAssertEqual(manager.activeCategory, .focusWork)
+        XCTAssertNotNil(manager.sessionStartDate, "startSession must record the true session start")
         XCTAssertEqual(manager.formattedElapsed, "00:00:00")
 
         // Simulate tick
         manager.liveElapsedSeconds = 65
         XCTAssertEqual(manager.formattedElapsed, "00:01:05", "Observation property must format elapsed time")
 
-        _ = manager.stopSession()
+        // Pause/resume must preserve the original session start, not the resume time.
+        let originalStart = try? XCTUnwrap(manager.sessionStartDate)
+        manager.pauseSession()
+        manager.resumeSession()
+        XCTAssertEqual(manager.sessionStartDate, originalStart, "resume must not rewrite the session start")
+
+        let session = manager.stopSession()
         XCTAssertFalse(manager.isRunning)
         XCTAssertEqual(manager.liveElapsedSeconds, 0)
+        XCTAssertEqual(session?.startTime, originalStart, "finished session must carry the true start time")
+    }
+
+    func testStartSessionPreservesOrphanInsteadOfDiscarding() {
+        let manager = SessionManager.shared
+        manager.cancelSession()
+        manager.startSession(category: .focusWork)
+        let originalStart = try? XCTUnwrap(manager.sessionStartDate)
+
+        let orphaned = manager.startSession(category: .workout)
+        XCTAssertNotNil(orphaned, "starting a second session must return the orphaned session")
+        XCTAssertEqual(orphaned?.category, .focusWork)
+        XCTAssertEqual(orphaned?.startTime, originalStart)
+        XCTAssertEqual(manager.activeCategory, .workout)
+
+        manager.cancelSession()
     }
 
     // MARK: - 8. Unlogged Gap Upkeep Logic
