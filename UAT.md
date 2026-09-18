@@ -31,7 +31,7 @@ Simulator UI journeys (`Tests/StriveRingUITests`):
 1. **Launch & tab navigation** — `Today’s Rhythm` + `ALIGNMENT` render; Timeline shows `24h Timeline`; Trends shows `Accountability` and the workout target card.
 2. **Active session start** — Focus quick-start opens the chamber or the `ACTIVE SESSION` dock.
 3. **Retroactive logging + undo** — Focus quick-add opens `Log Time Block`, Confirm writes the session, `Undo` toast appears.
-4. **Workout full credit** — 40m workout logs and the pillar card shows `Full Credit (+20 pts)`.
+4. **Workout full credit** — 40m workout logs and the pillar card shows `Weekly: Day 1 of 6` with `+20 pts`.
 5. **Calibration** — Trends → Calibration renders the gate, workout, family, weekend, and drift rule cards.
 
 ## Manual UAT checklist (iPhone 16 via LiveContainer)

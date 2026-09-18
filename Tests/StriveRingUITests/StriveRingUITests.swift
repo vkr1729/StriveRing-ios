@@ -68,19 +68,20 @@ final class StriveRingUITests: XCTestCase {
     }
 
     @MainActor
-    func testFocusGateAndDriftCardsRender() throws {
+    func testWorkoutFullCreditAndWeeklyBadge() throws {
         launch(reset: true)
 
         XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 4))
 
-        // Log a 40-minute workout: it must earn full credit and show the weekly badge.
+        // Log a 40-minute workout (the sheet defaults to 40m for workouts).
         app.buttons["log-workout"].tap()
         XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 3))
         app.buttons["Confirm Entry"].tap()
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
 
-        // Workout pillar card must reflect the qualifying session.
-        XCTAssertTrue(app.staticTexts["Full Credit (+20 pts)"].waitForExistence(timeout: 3))
+        // The workout pillar card shows the weekly badge and full-credit points.
+        XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["+20 pts"].exists)
 
         keepScreenshot(named: "04-workout-credit")
     }
