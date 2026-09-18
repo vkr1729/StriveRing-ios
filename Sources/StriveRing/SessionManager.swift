@@ -25,6 +25,13 @@ final class SessionManager {
     private let userDefaultsNoteKey = "StriveRing_Note"
 
     init() {
+        // UI tests reset SwiftData but share the simulator's UserDefaults across
+        // launches; a session left running by one test would otherwise leak into
+        // the next. Start clean when a test reset is requested.
+        if ProcessInfo.processInfo.environment["STRIVERING_UITEST_RESET"] == "1" {
+            clearPersistedState()
+            return
+        }
         restoreState()
     }
 
@@ -212,6 +219,16 @@ final class SessionManager {
         }
 
         checkRunawaySession()
+    }
+
+    private func clearPersistedState() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: userDefaultsCategoryKey)
+        defaults.removeObject(forKey: userDefaultsStartTimeKey)
+        defaults.removeObject(forKey: userDefaultsSessionStartKey)
+        defaults.removeObject(forKey: userDefaultsAccumulatedKey)
+        defaults.removeObject(forKey: userDefaultsIsPausedKey)
+        defaults.removeObject(forKey: userDefaultsNoteKey)
     }
 
     private func clearState() {

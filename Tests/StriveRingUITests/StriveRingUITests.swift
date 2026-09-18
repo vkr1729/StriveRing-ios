@@ -28,18 +28,33 @@ final class StriveRingUITests: XCTestCase {
     }
 
     @MainActor
-    func testActiveSessionStartAndStop() throws {
+    func testActiveSessionStartPauseAndStop() throws {
         launch(reset: true)
+
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10))
+
+        // No session may leak in from another test's UserDefaults state.
+        XCTAssertFalse(app.staticTexts["ACTIVE SESSION"].exists, "Today must start idle after reset")
 
         // Tap Focus Quick Start
         let startFocus = app.buttons["Focus"]
-        if startFocus.waitForExistence(timeout: 8) {
-            startFocus.tap()
-        }
+        XCTAssertTrue(startFocus.waitForExistence(timeout: 8), "Focus quick-start must exist")
+        startFocus.tap()
 
-        // Verify Focus Chamber or Active Dock appears
-        let activeLabel = app.staticTexts["ACTIVE SESSION"]
-        XCTAssertTrue(activeLabel.waitForExistence(timeout: 10) || app.staticTexts["DEEP WORK CHAMBER"].exists)
+        // The Focus Chamber opens for focus sessions.
+        XCTAssertTrue(app.staticTexts["DEEP WORK CHAMBER"].waitForExistence(timeout: 10))
+
+        // Pause and resume from inside the chamber.
+        let pauseButton = app.buttons["Pause"]
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: 8))
+        pauseButton.tap()
+        let resumeButton = app.buttons["Resume"]
+        XCTAssertTrue(resumeButton.waitForExistence(timeout: 8))
+        resumeButton.tap()
+
+        // Finish the block and verify the dock is gone and the session logged.
+        app.buttons["Finish Block"].tap()
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 8), "Undo toast must appear after finishing")
 
         keepScreenshot(named: "02-active-session")
     }
