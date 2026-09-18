@@ -44,16 +44,20 @@ final class StriveRingUITests: XCTestCase {
         // The Focus Chamber opens for focus sessions.
         XCTAssertTrue(app.staticTexts["DEEP WORK CHAMBER"].waitForExistence(timeout: 10))
 
-        // Pause and resume from inside the chamber.
-        let pauseButton = app.buttons["Pause"]
-        XCTAssertTrue(pauseButton.waitForExistence(timeout: 8))
+        // Pause and resume from inside the chamber via its identifiers,
+        // unambiguous with the session dock behind the cover.
+        let pauseButton = app.buttons["chamber-pause-resume"]
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: 8), "Chamber pause must exist")
+        XCTAssertTrue(app.staticTexts["Pause"].exists)
         pauseButton.tap()
-        let resumeButton = app.buttons["Resume"]
-        XCTAssertTrue(resumeButton.waitForExistence(timeout: 8))
-        resumeButton.tap()
+        XCTAssertTrue(app.staticTexts["Resume"].waitForExistence(timeout: 8), "Chamber must show Resume after pause")
+        pauseButton.tap()
+        XCTAssertTrue(app.staticTexts["Pause"].waitForExistence(timeout: 8), "Chamber must show Pause after resume")
 
-        // Finish the block and verify the dock is gone and the session logged.
-        app.buttons["Finish Block"].tap()
+        // Finish the block and verify the session logged.
+        let finishButton = app.buttons["chamber-finish"]
+        XCTAssertTrue(finishButton.waitForExistence(timeout: 8), "Chamber finish must exist")
+        finishButton.tap()
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 8), "Undo toast must appear after finishing")
 
         keepScreenshot(named: "02-active-session")
@@ -90,15 +94,18 @@ final class StriveRingUITests: XCTestCase {
 
         // Log a 40-minute workout (the sheet defaults to 40m for workouts).
         let workoutLogButton = app.buttons["log-workout"]
-        XCTAssertTrue(workoutLogButton.waitForExistence(timeout: 5), "Workout quick-add must exist on Today")
+        XCTAssertTrue(workoutLogButton.waitForExistence(timeout: 5), "STEP quick-add must exist on Today")
         workoutLogButton.tap()
-        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 5))
-        app.buttons["Confirm Entry"].tap()
-        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Log Time Block"].waitForExistence(timeout: 5), "STEP sheet must open")
+        let confirmButton = app.buttons["Confirm Entry"]
+        XCTAssertTrue(confirmButton.waitForExistence(timeout: 5), "STEP confirm must exist")
+        XCTAssertTrue(confirmButton.isHittable, "STEP confirm must be hittable without scrolling")
+        confirmButton.tap()
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 8), "STEP undo toast must appear")
 
         // The workout pillar card shows the weekly badge and full-credit points.
-        XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["+20 pts"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 8), "STEP weekly badge must show Day 1 of 6")
+        XCTAssertTrue(app.staticTexts["+20 pts"].waitForExistence(timeout: 8), "STEP workout card must show +20 pts")
 
         keepScreenshot(named: "04-workout-credit")
     }

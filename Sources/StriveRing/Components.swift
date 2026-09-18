@@ -218,6 +218,7 @@ struct ActiveTimerDock: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(sessionManager.isPaused ? "Resume" : "Pause")
+                .accessibilityIdentifier("dock-pause-resume")
 
                 Button {
                     onStop()
@@ -230,6 +231,7 @@ struct ActiveTimerDock: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Stop Session")
+                .accessibilityIdentifier("dock-stop")
             }
         }
         .padding(.horizontal, 16)

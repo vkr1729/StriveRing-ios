@@ -147,6 +147,7 @@ struct FocusChamberView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.srLine, lineWidth: 1))
                     }
+                    .accessibilityIdentifier("chamber-pause-resume")
 
                     Button {
                         onFinish()
@@ -160,6 +161,7 @@ struct FocusChamberView: View {
                             .background(Color.srBrand)
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
+                    .accessibilityIdentifier("chamber-finish")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 28)
