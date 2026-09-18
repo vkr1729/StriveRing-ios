@@ -43,13 +43,32 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      - name: Resolve simulator destination
+        id: sim
+        run: |
+          AVAILABLE="$(xcrun simctl list devices available)"
+          echo "$AVAILABLE" | grep -E "iPhone|iPad" | head -10 || true
+          if echo "$AVAILABLE" | grep -q "iPhone 17"; then
+            echo 'destination=platform=iOS Simulator,name=iPhone 17,OS=latest' >> "$GITHUB_OUTPUT"
+          else
+            FALLBACK="$(echo "$AVAILABLE" | grep -oE 'iPhone [0-9]+( Pro( Max)?)?' | sort -uV | tail -1)"
+            if [ -z "$FALLBACK" ]; then
+              echo "No iOS simulator runtime on this runner; downloading the iOS platform."
+              sudo xcodebuild -downloadPlatform iOS
+              echo 'destination=platform=iOS Simulator,name=iPhone 17,OS=latest' >> "$GITHUB_OUTPUT"
+            else
+              echo "Using fallback simulator: $FALLBACK"
+              echo "destination=platform=iOS Simulator,name=$FALLBACK,OS=latest" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Run unit and simulator UAT
         run: |
           set -o pipefail
           xcodebuild test \
             -project StriveRing.xcodeproj \
             -scheme StriveRing \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' \
+            -destination '${{ steps.sim.outputs.destination }}' \
             -derivedDataPath build/TestDerivedData \
             -resultBundlePath build/StriveRing-UAT.xcresult \
             -parallel-testing-enabled NO \

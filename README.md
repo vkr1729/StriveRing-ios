@@ -33,5 +33,5 @@ On Ubuntu Linux, push to GitHub and download the `StriveRing-unsigned-ipa` artif
 - `PROJECT.md` — project blueprint, scoring equations, and system architecture.
 - `design-system/strivering/MASTER.md` — selected Clear Glass tokens and rules.
 - `DESIGN_DECISION.md` — comparison of 5 visual directions and why Clear Glass Signature won.
-- `UAT.md` — automated acceptance journeys on iPhone 17 (iOS 26.5).
+- `UAT.md` — automated acceptance journeys on iPhone 17 (latest iOS 26 simulator).
 - `mockups/strivering-mockups.html` — interactive visual board with real-time day simulation scrubber.

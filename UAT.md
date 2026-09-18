@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Validate the complete daily time rhythm, active timer resilience, focus lock-in gate, workout turnaround, and drift audit on an iPhone 17 simulator running iOS 26.5.
+Validate the complete daily time rhythm, active timer resilience, focus lock-in gate, workout turnaround, and drift audit on an iPhone 17 simulator running the latest iOS 26 runtime (CI falls back to the newest available iPhone simulator if the image lacks one).
 
 Device note: the shipped `.ipa` targets sideloading via **SideStore / LiveContainer on iPhone 16**. LiveContainer suspends background apps aggressively, so timer journeys below explicitly cover backgrounding, relaunch persistence, and runaway-session trim.
 
@@ -49,6 +49,6 @@ Run these once per release on-device; each takes seconds.
 
 ## Release gate
 
-- All unit tests and all simulator UI journeys pass on iOS 26.5.
+- All unit tests and all simulator UI journeys pass on the latest iOS 26 simulator runtime.
 - Zero crash, zero timer drift, zero lost sessions, zero visual truncation.
 - A fresh, sideloadable `StriveRing-unsigned-ipa` is generated and uploaded as a GitHub Actions artifact (built on every push to `main`, every PR touching app code, and on demand via workflow dispatch).
