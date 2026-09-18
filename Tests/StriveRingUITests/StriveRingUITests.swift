@@ -31,18 +31,18 @@ final class StriveRingUITests: XCTestCase {
     func testActiveSessionStartPauseAndStop() throws {
         launch(reset: true)
 
-        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Today’s Rhythm"].waitForExistence(timeout: 10), "STEP today must render")
 
         // No session may leak in from another test's UserDefaults state.
-        XCTAssertFalse(app.staticTexts["ACTIVE SESSION"].exists, "Today must start idle after reset")
+        XCTAssertFalse(app.staticTexts["ACTIVE SESSION"].exists, "STEP today must start idle after reset")
 
         // Tap Focus Quick Start
         let startFocus = app.buttons["Focus"]
-        XCTAssertTrue(startFocus.waitForExistence(timeout: 8), "Focus quick-start must exist")
+        XCTAssertTrue(startFocus.waitForExistence(timeout: 8), "STEP focus quick-start must exist")
         startFocus.tap()
 
         // The Focus Chamber opens for focus sessions.
-        XCTAssertTrue(app.staticTexts["DEEP WORK CHAMBER"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["DEEP WORK CHAMBER"].waitForExistence(timeout: 10), "STEP chamber must open")
 
         // Pause and resume from inside the chamber via its identifiers,
         // unambiguous with the session dock behind the cover.
@@ -102,6 +102,10 @@ final class StriveRingUITests: XCTestCase {
         XCTAssertTrue(confirmButton.isHittable, "STEP confirm must be hittable without scrolling")
         confirmButton.tap()
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 8), "STEP undo toast must appear")
+
+        // Diagnostic evidence of the card state before asserting the badge.
+        keepScreenshot(named: "04a-after-workout-log")
+        print("UAT-LABELS: " + app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: " | "))
 
         // The workout pillar card shows the weekly badge and full-credit points.
         XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 8), "STEP weekly badge must show Day 1 of 6")
