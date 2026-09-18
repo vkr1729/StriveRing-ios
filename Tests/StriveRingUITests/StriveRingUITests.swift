@@ -44,15 +44,16 @@ final class StriveRingUITests: XCTestCase {
         // The Focus Chamber opens for focus sessions.
         XCTAssertTrue(app.staticTexts["DEEP WORK CHAMBER"].waitForExistence(timeout: 10), "STEP chamber must open")
 
-        // Pause and resume from inside the chamber via its identifiers,
-        // unambiguous with the session dock behind the cover.
+        // Pause and resume from inside the chamber via its identifier,
+        // unambiguous with the session dock behind the cover. The button
+        // label flips while its identifier stays stable.
         let pauseButton = app.buttons["chamber-pause-resume"]
-        XCTAssertTrue(pauseButton.waitForExistence(timeout: 8), "Chamber pause must exist")
-        XCTAssertTrue(app.staticTexts["Pause"].exists)
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: 8), "STEP chamber pause must exist")
+        XCTAssertEqual(pauseButton.label, "Pause", "STEP chamber must start unpaused")
         pauseButton.tap()
-        XCTAssertTrue(app.staticTexts["Resume"].waitForExistence(timeout: 8), "Chamber must show Resume after pause")
+        XCTAssertEqual(pauseButton.label, "Resume", "STEP chamber must show Resume after pause")
         pauseButton.tap()
-        XCTAssertTrue(app.staticTexts["Pause"].waitForExistence(timeout: 8), "Chamber must show Pause after resume")
+        XCTAssertEqual(pauseButton.label, "Pause", "STEP chamber must show Pause after resume")
 
         // Finish the block and verify the session logged.
         let finishButton = app.buttons["chamber-finish"]
@@ -104,8 +105,8 @@ final class StriveRingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 8), "STEP undo toast must appear")
 
         // Diagnostic evidence of the card state before asserting the badge.
+        // (Attachments persist in the xcresult even when a later assert fails.)
         keepScreenshot(named: "04a-after-workout-log")
-        print("UAT-LABELS: " + app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: " | "))
 
         // The workout pillar card shows the weekly badge and full-credit points.
         XCTAssertTrue(app.staticTexts["Weekly: Day 1 of 6"].waitForExistence(timeout: 8), "STEP weekly badge must show Day 1 of 6")
